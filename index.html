@@ -757,8 +757,8 @@
             };
             const dobVal = document.getElementById("pDOB").value.trim();
             const dodVal = document.getElementById("pDOD").value.trim();
-            if (dobVal) personAttrs.DOB = new Date(dobVal).getTime();
-            if (dodVal) personAttrs.DOD = new Date(dodVal).getTime();
+            if (dobVal) personAttrs.DOB = new Date(dobVal).toISOString();
+            if (dodVal) personAttrs.DOD = new Date(dodVal).toISOString();
 
             const personResult = await personsTable.applyEdits({
               addFeatures: [{ attributes: personAttrs }]
@@ -802,8 +802,8 @@
           if ((currentSiteType === "grave" || currentSiteType === "birthplace") && isNewPerson) {
             const dobVal = document.getElementById("pDOB").value.trim();
             const dodVal = document.getElementById("pDOD").value.trim();
-            if (dobVal) siteAttrs.DOB = new Date(dobVal).getTime();
-            if (currentSiteType === "grave" && dodVal) siteAttrs.DOD = new Date(dodVal).getTime();
+            if (dobVal) siteAttrs.DOB = new Date(dobVal).toISOString();
+            if (currentSiteType === "grave" && dodVal) siteAttrs.DOD = new Date(dodVal).toISOString();
           }
 
           // ── Write site feature ──
