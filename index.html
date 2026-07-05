@@ -217,15 +217,19 @@
     <div id="searchPanel">
       <b>Filter by Person</b>
       <input type="text" id="personSearch" class="rr-input" placeholder="Enter name..." />
-      <button id="searchBtn" class="rr-btn">Search</button>
-      <button id="traceWebBtn" class="rr-btn" id="traceWebBtn" style="display:none; background:#6b1a1a;">⬡ Trace Family Web</button>
+      <div style="display:flex; gap:6px;">
+        <button id="searchBtn" class="rr-btn" style="flex:2;">Search</button>
+        <button id="browseBtn" class="rr-btn-secondary" style="flex:1;" title="Browse all records">Browse</button>
+      </div>
+      <div id="browseResults" style="display:none; max-height:180px; overflow-y:auto; border:1px solid #ddd; border-radius:3px; margin-top:6px; font-size:12px;"></div>
+      <button id="traceWebBtn" class="rr-btn" style="display:none; background:#6b1a1a; margin-top:6px;">⬡ Trace Family Web</button>
       <button id="clearBtn" class="rr-btn-secondary">Clear filter</button>
       <div id="webLegend" style="display:none; margin-top:10px; font-size:11px; color:#555;">
         <div style="margin-bottom:4px; font-weight:bold; letter-spacing:0.5px; text-transform:uppercase;">Generation Key</div>
-        <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(100,0,0);"></span> Generation 1 (parents)</div>
-        <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(160,40,40);"></span> Generation 2 (grandparents)</div>
-        <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(200,100,100);"></span> Generation 3</div>
-        <div style="display:flex; align-items:center; gap:6px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(230,170,170);"></span> Generation 4</div>
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(100,0,0);"></span> Gen 1 — Parents</div>
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(160,40,40);"></span> Gen 2 — Grandparents</div>
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(200,100,100);"></span> Gen 3</div>
+        <div style="display:flex; align-items:center; gap:6px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(230,170,170);"></span> Gen 4</div>
       </div>
     </div>
 
@@ -507,26 +511,38 @@
       document.getElementById("toggleBirthplaces").addEventListener("change", e => birthplaceLayer.visible = e.target.checked);
       document.getElementById("toggleHouses").addEventListener("change", e => houseLayer.visible = e.target.checked);
 
-      // ── Person filter ──
+      // ── Person filter & browse ──
       let currentFilterName = null;
 
-      document.getElementById("searchBtn").addEventListener("click", () => {
-        const name = document.getElementById("personSearch").value.trim();
-        if (!name) return;
+      function applyFilter(name) {
         currentFilterName = name;
+        document.getElementById("personSearch").value = name;
         const where = `person_id LIKE '%${name}%'`;
         gravesLayer.definitionExpression = where;
         birthplaceLayer.definitionExpression = where;
         houseLayer.definitionExpression = where;
-        // Show trace button
         document.getElementById("traceWebBtn").style.display = "block";
-        // Clear any existing lineage
+        document.getElementById("browseResults").style.display = "none";
         lineageLayer.removeAll();
         lineageLayer.visible = false;
         lineageVisible = false;
         document.getElementById("lineageToggle").textContent = "⬡ Show All Family Web";
         document.getElementById("lineageToggle").classList.remove("active");
         document.getElementById("webLegend").style.display = "none";
+        document.getElementById("traceWebBtn").textContent = "⬡ Trace Family Web";
+        document.getElementById("traceWebBtn").disabled = false;
+      }
+
+      document.getElementById("searchBtn").addEventListener("click", () => {
+        const name = document.getElementById("personSearch").value.trim();
+        if (name) applyFilter(name);
+      });
+
+      document.getElementById("personSearch").addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+          const name = document.getElementById("personSearch").value.trim();
+          if (name) applyFilter(name);
+        }
       });
 
       document.getElementById("clearBtn").addEventListener("click", () => {
@@ -537,6 +553,7 @@
         houseLayer.definitionExpression = "";
         document.getElementById("traceWebBtn").style.display = "none";
         document.getElementById("webLegend").style.display = "none";
+        document.getElementById("browseResults").style.display = "none";
         lineageLayer.removeAll();
         lineageLayer.visible = false;
         lineageVisible = false;
@@ -544,132 +561,44 @@
         document.getElementById("lineageToggle").classList.remove("active");
       });
 
-      // ── Generation colors (darker = closer generation) ──
-      const generationColors = [
-        [100, 0, 0, 230],      // Gen 1 — deep dark red
-        [160, 40, 40, 200],    // Gen 2 — medium red
-        [200, 100, 100, 170],  // Gen 3 — lighter red
-        [230, 170, 170, 140]   // Gen 4 — pale pink
-      ];
-
-      // ── Trace family web from a specific person ──
-      async function traceFromPerson(startName) {
-        lineageLayer.removeAll();
-
-        // Query all graves for name→geometry lookup
-        const gravesResult = await gravesLayer.queryFeatures({
-          where: "1=1", outFields: ["person_id"], returnGeometry: true
-        });
-        const gravesByName = {};
-        gravesResult.features.forEach(f => {
-          const name = (f.attributes.person_id || "").trim().toLowerCase();
-          if (name) gravesByName[name] = f.geometry;
-        });
-
-        // Query all persons for name→{father,mother} lookup
-        const personsResult = await personsTable.queryFeatures({
-          where: "1=1", outFields: ["Name", "Father", "Mother"], returnGeometry: false
-        });
-        const personsByName = {};
-        personsResult.features.forEach(f => {
-          const name = (f.attributes.Name || "").trim().toLowerCase();
-          if (name) personsByName[name] = {
-            father: (f.attributes.Father || "").trim().toLowerCase(),
-            mother: (f.attributes.Mother || "").trim().toLowerCase()
-          };
-        });
-
-        const involvedPoints = [];
-        let lineCount = 0;
-        const visited = new Set();
-
-        // Recursive trace — BFS by generation
-        function traceGeneration(name, generation) {
-          if (generation > 4 || visited.has(name) || !name) return;
-          visited.add(name);
-
-          const childPoint = gravesByName[name];
-          const person = personsByName[name];
-          if (!person) return;
-
-          const color = generationColors[generation - 1] || generationColors[3];
-          const lineSymbol = { type: "simple-line", color, width: Math.max(1, 3 - generation * 0.5), style: "solid" };
-
-          // Draw line to father
-          if (person.father && gravesByName[person.father] && childPoint) {
-            const fatherPoint = gravesByName[person.father];
-            lineageLayer.add(new Graphic({
-              geometry: { type: "polyline", paths: [[
-                [childPoint.longitude, childPoint.latitude],
-                [fatherPoint.longitude, fatherPoint.latitude]
-              ]]},
-              symbol: lineSymbol,
-              attributes: { relationship: `Gen ${generation}: ${name} → ${person.father} (father)` },
-              popupTemplate: { title: "Family Connection", content: `{relationship}` }
-            }));
-            involvedPoints.push(childPoint, fatherPoint);
-            lineCount++;
-            traceGeneration(person.father, generation + 1);
-          }
-
-          // Draw line to mother
-          if (person.mother && gravesByName[person.mother] && childPoint) {
-            const motherPoint = gravesByName[person.mother];
-            lineageLayer.add(new Graphic({
-              geometry: { type: "polyline", paths: [[
-                [childPoint.longitude, childPoint.latitude],
-                [motherPoint.longitude, motherPoint.latitude]
-              ]]},
-              symbol: { ...lineSymbol, color: [...color.slice(0,2).reverse(), color[2], color[3]] },
-              attributes: { relationship: `Gen ${generation}: ${name} → ${person.mother} (mother)` },
-              popupTemplate: { title: "Family Connection", content: `{relationship}` }
-            }));
-            involvedPoints.push(childPoint, motherPoint);
-            lineCount++;
-            traceGeneration(person.mother, generation + 1);
-          }
+      // ── Browse all persons ──
+      document.getElementById("browseBtn").addEventListener("click", async () => {
+        const resultsDiv = document.getElementById("browseResults");
+        if (resultsDiv.style.display === "block") {
+          resultsDiv.style.display = "none";
+          return;
         }
-
-        traceGeneration(startName.trim().toLowerCase(), 1);
-
-        // Build extent
-        let extent = null;
-        if (involvedPoints.length > 0) {
-          let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
-          involvedPoints.forEach(p => {
-            if (p.longitude < xmin) xmin = p.longitude;
-            if (p.longitude > xmax) xmax = p.longitude;
-            if (p.latitude < ymin) ymin = p.latitude;
-            if (p.latitude > ymax) ymax = p.latitude;
-          });
-          extent = { type: "extent", xmin, ymin, xmax, ymax, spatialReference: { wkid: 4326 } };
-        }
-
-        return { count: lineCount, extent };
-      }
-
-      // ── Trace button handler ──
-      document.getElementById("traceWebBtn").addEventListener("click", async () => {
-        if (!currentFilterName) return;
-        const btn = document.getElementById("traceWebBtn");
-        btn.disabled = true;
-        btn.textContent = "⬡ Tracing...";
+        resultsDiv.innerHTML = "<div style='padding:8px; color:#888;'>Loading...</div>";
+        resultsDiv.style.display = "block";
         try {
-          const { count, extent } = await traceFromPerson(currentFilterName);
-          lineageLayer.visible = true;
-          lineageVisible = true;
-          btn.textContent = count > 0
-            ? `⬡ ${count} links traced`
-            : "⬡ No links found";
-          document.getElementById("webLegend").style.display = count > 0 ? "block" : "none";
-          if (extent && count > 0) {
-            await view.goTo({ target: extent, expansion: 1.4 }, { duration: 1200, easing: "ease-in-out" });
+          const result = await personsTable.queryFeatures({
+            where: "1=1",
+            outFields: ["Name", "DOB", "DOD"],
+            orderByFields: ["Name ASC"],
+            returnGeometry: false
+          });
+          resultsDiv.innerHTML = "";
+          if (result.features.length === 0) {
+            resultsDiv.innerHTML = "<div style='padding:8px; color:#888;'>No records yet.</div>";
+            return;
           }
+          result.features.forEach(f => {
+            const attrs = f.attributes;
+            const name = attrs.Name || "Unknown";
+            const dob = attrs.DOB ? new Date(attrs.DOB).getFullYear() : "?";
+            const dod = attrs.DOD ? new Date(attrs.DOD).getFullYear() : "?";
+            const div = document.createElement("div");
+            div.style.cssText = "padding:7px 10px; cursor:pointer; border-bottom:1px solid #f0f0f0;";
+            div.innerHTML = `<strong style="font-size:12px;">${name}</strong> <span style="color:#888; font-size:11px;">${dob}–${dod}</span>`;
+            div.addEventListener("mouseover", () => div.style.background = "#f5f5f5");
+            div.addEventListener("mouseout", () => div.style.background = "");
+            div.addEventListener("click", () => applyFilter(name));
+            resultsDiv.appendChild(div);
+          });
         } catch (err) {
-          console.error("Trace failed:", err);
-          btn.textContent = "⬡ Trace Family Web";
+          resultsDiv.innerHTML = "<div style='padding:8px; color:#888;'>Failed to load records.</div>";
+          console.error(err);
         }
-        btn.disabled = false;
       });
 
       // ── Popup action handlers ──
@@ -1021,11 +950,115 @@
       // ── Lineage graphics layer ──
       const lineageLayer = new GraphicsLayer({ title: "Family Web", listMode: "hide" });
       map.add(lineageLayer);
-
-      // Add lineage toggle button to UI
       view.ui.add(document.getElementById("lineageToggle"), "top-left");
-
       let lineageVisible = false;
+
+      // ── Generation colors ──
+      const generationColors = [
+        [100, 0, 0, 230],
+        [160, 40, 40, 200],
+        [200, 100, 100, 170],
+        [230, 170, 170, 140]
+      ];
+
+      // ── Trace family web from a specific person ──
+      async function traceFromPerson(startName) {
+        lineageLayer.removeAll();
+        const gravesResult = await gravesLayer.queryFeatures({
+          where: "1=1", outFields: ["person_id"], returnGeometry: true
+        });
+        const gravesByName = {};
+        gravesResult.features.forEach(f => {
+          const name = (f.attributes.person_id || "").trim().toLowerCase();
+          if (name) gravesByName[name] = f.geometry;
+        });
+        const personsResult = await personsTable.queryFeatures({
+          where: "1=1", outFields: ["Name", "Father", "Mother"], returnGeometry: false
+        });
+        const personsByName = {};
+        personsResult.features.forEach(f => {
+          const name = (f.attributes.Name || "").trim().toLowerCase();
+          if (name) personsByName[name] = {
+            father: (f.attributes.Father || "").trim().toLowerCase(),
+            mother: (f.attributes.Mother || "").trim().toLowerCase()
+          };
+        });
+        const involvedPoints = [];
+        let lineCount = 0;
+        const visited = new Set();
+
+        function traceGeneration(name, generation) {
+          if (generation > 4 || visited.has(name) || !name) return;
+          visited.add(name);
+          const childPoint = gravesByName[name];
+          const person = personsByName[name];
+          if (!person) return;
+          const color = generationColors[generation - 1] || generationColors[3];
+          const lineSymbol = { type: "simple-line", color, width: Math.max(1, 3 - generation * 0.5), style: "solid" };
+
+          if (person.father && gravesByName[person.father] && childPoint) {
+            const fatherPoint = gravesByName[person.father];
+            lineageLayer.add(new Graphic({
+              geometry: { type: "polyline", paths: [[[childPoint.longitude, childPoint.latitude],[fatherPoint.longitude, fatherPoint.latitude]]]},
+              symbol: lineSymbol,
+              attributes: { relationship: `Gen ${generation}: ${name} → ${person.father} (father)` },
+              popupTemplate: { title: "Family Connection", content: `{relationship}` }
+            }));
+            involvedPoints.push(childPoint, fatherPoint);
+            lineCount++;
+            traceGeneration(person.father, generation + 1);
+          }
+          if (person.mother && gravesByName[person.mother] && childPoint) {
+            const motherPoint = gravesByName[person.mother];
+            lineageLayer.add(new Graphic({
+              geometry: { type: "polyline", paths: [[[childPoint.longitude, childPoint.latitude],[motherPoint.longitude, motherPoint.latitude]]]},
+              symbol: { ...lineSymbol, color: [color[1], color[0], color[2], color[3]] },
+              attributes: { relationship: `Gen ${generation}: ${name} → ${person.mother} (mother)` },
+              popupTemplate: { title: "Family Connection", content: `{relationship}` }
+            }));
+            involvedPoints.push(childPoint, motherPoint);
+            lineCount++;
+            traceGeneration(person.mother, generation + 1);
+          }
+        }
+
+        traceGeneration(startName.trim().toLowerCase(), 1);
+
+        let extent = null;
+        if (involvedPoints.length > 0) {
+          let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
+          involvedPoints.forEach(p => {
+            if (p.longitude < xmin) xmin = p.longitude;
+            if (p.longitude > xmax) xmax = p.longitude;
+            if (p.latitude < ymin) ymin = p.latitude;
+            if (p.latitude > ymax) ymax = p.latitude;
+          });
+          extent = { type: "extent", xmin, ymin, xmax, ymax, spatialReference: { wkid: 4326 } };
+        }
+        return { count: lineCount, extent };
+      }
+
+      // ── Trace button handler ──
+      document.getElementById("traceWebBtn").addEventListener("click", async () => {
+        if (!currentFilterName) return;
+        const btn = document.getElementById("traceWebBtn");
+        btn.disabled = true;
+        btn.textContent = "⬡ Tracing...";
+        try {
+          const { count, extent } = await traceFromPerson(currentFilterName);
+          lineageLayer.visible = true;
+          lineageVisible = true;
+          btn.textContent = count > 0 ? `⬡ ${count} links traced` : "⬡ No links found";
+          document.getElementById("webLegend").style.display = count > 0 ? "block" : "none";
+          if (extent && count > 0) {
+            await view.goTo({ target: extent, expansion: 1.4 }, { duration: 1200, easing: "ease-in-out" });
+          }
+        } catch (err) {
+          console.error("Trace failed:", err);
+          btn.textContent = "⬡ Trace Family Web";
+        }
+        btn.disabled = false;
+      });
 
       async function buildLineageWeb() {
         lineageLayer.removeAll();
