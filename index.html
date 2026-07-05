@@ -873,76 +873,86 @@
       async function buildLineageWeb() {
         lineageLayer.removeAll();
 
-        // 1. Query all Graves with geometry and person name
         const gravesResult = await gravesLayer.queryFeatures({
           where: "1=1",
           outFields: ["person_id", "OBJECTID"],
           returnGeometry: true
         });
 
-        if (gravesResult.features.length === 0) return;
+        if (gravesResult.features.length === 0) return { count: 0, extent: null };
 
-        // Build a lookup: name (lowercase) → point geometry
         const gravesByName = {};
         gravesResult.features.forEach(f => {
           const name = (f.attributes.person_id || "").trim().toLowerCase();
           if (name) gravesByName[name] = f.geometry;
         });
 
-        // 2. Query Persons table for father/mother relationships
         const personsResult = await personsTable.queryFeatures({
           where: "1=1",
           outFields: ["Name", "Father", "Mother"],
           returnGeometry: false
         });
 
-        // 3. For each person, try to match father and mother to graves
         const lineSymbol = {
-          type: "simple-line",
-          color: [139, 26, 26, 180],
-          width: 1.5,
-          style: "solid"
+          type: "simple-line", color: [139, 26, 26, 180],
+          width: 1.5, style: "solid"
         };
 
         let lineCount = 0;
+        const involvedPoints = [];
+
         personsResult.features.forEach(f => {
           const attrs = f.attributes;
           const childName = (attrs.Name || "").trim().toLowerCase();
           const fatherName = (attrs.Father || "").trim().toLowerCase();
           const motherName = (attrs.Mother || "").trim().toLowerCase();
-
           const childPoint = gravesByName[childName];
 
-          // Draw line to father's grave
           if (childPoint && fatherName && gravesByName[fatherName]) {
+            const fatherPoint = gravesByName[fatherName];
             lineageLayer.add(new Graphic({
               geometry: { type: "polyline", paths: [[
                 [childPoint.longitude, childPoint.latitude],
-                [gravesByName[fatherName].longitude, gravesByName[fatherName].latitude]
+                [fatherPoint.longitude, fatherPoint.latitude]
               ]]},
               symbol: lineSymbol,
               attributes: { relationship: `${attrs.Name} → ${attrs.Father}` },
               popupTemplate: { title: "Family Connection", content: `{relationship}` }
             }));
+            involvedPoints.push(childPoint, fatherPoint);
             lineCount++;
           }
 
-          // Draw line to mother's grave
           if (childPoint && motherName && gravesByName[motherName]) {
+            const motherPoint = gravesByName[motherName];
             lineageLayer.add(new Graphic({
               geometry: { type: "polyline", paths: [[
                 [childPoint.longitude, childPoint.latitude],
-                [gravesByName[motherName].longitude, gravesByName[motherName].latitude]
+                [motherPoint.longitude, motherPoint.latitude]
               ]]},
               symbol: { ...lineSymbol, color: [26, 26, 139, 180] },
               attributes: { relationship: `${attrs.Name} → ${attrs.Mother}` },
               popupTemplate: { title: "Family Connection", content: `{relationship}` }
             }));
+            involvedPoints.push(childPoint, motherPoint);
             lineCount++;
           }
         });
 
-        return lineCount;
+        // Build extent from all involved grave points
+        let extent = null;
+        if (involvedPoints.length > 0) {
+          let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
+          involvedPoints.forEach(p => {
+            if (p.longitude < xmin) xmin = p.longitude;
+            if (p.longitude > xmax) xmax = p.longitude;
+            if (p.latitude < ymin) ymin = p.latitude;
+            if (p.latitude > ymax) ymax = p.latitude;
+          });
+          extent = { type: "extent", xmin, ymin, xmax, ymax, spatialReference: { wkid: 4326 } };
+        }
+
+        return { count: lineCount, extent };
       }
 
       document.getElementById("lineageToggle").addEventListener("click", async () => {
@@ -957,7 +967,7 @@
           btn.textContent = "⬡ Building...";
           btn.disabled = true;
           try {
-            const count = await buildLineageWeb();
+            const { count, extent } = await buildLineageWeb();
             lineageLayer.visible = true;
             lineageVisible = true;
             btn.classList.add("active");
@@ -965,16 +975,12 @@
               ? `⬡ Hide Family Web (${count} links)`
               : "⬡ Hide Family Web (no links yet)";
 
-            // Zoom to extent of all lineage graphics
-            if (count > 0 && lineageLayer.graphics.length > 0) {
-              try {
-                await view.goTo(lineageLayer.graphics.toArray(), {
-                  duration: 1000,
-                  easing: "ease-in-out"
-                });
-              } catch (zoomErr) {
-                console.warn("Zoom to extent failed:", zoomErr);
-              }
+            // Zoom to extent of all involved graves with padding
+            if (extent && count > 0) {
+              await view.goTo({
+                target: extent,
+                expansion: 1.4
+              }, { duration: 1200, easing: "ease-in-out" });
             }
           } catch (err) {
             console.error("Lineage build failed:", err);
@@ -992,3 +998,4 @@
     </script>
   </body>
 </html>
+
