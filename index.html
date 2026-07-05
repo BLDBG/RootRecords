@@ -698,6 +698,8 @@
         }
       });
 
+      // ════════════════════════════════════════════
+      // CUSTOM ADD SITE WORKFLOW
       // I built this custom three-step panel because the built-in Editor widget
       // cannot simultaneously write to two different tables in one action.
       // My goal was that when a user captures a site (grave, birthplace, or house),
@@ -1282,8 +1284,8 @@
       // family is geographically distributed — showing migration patterns
       // across generations at a glance. It uses the same red line style as
       // the ancestor trace but doesn't color by generation since there is
-      // no single starting point to measure distance from - I'm thinking of 
-      // better ways to do this in the future for mother/father tracing.
+      // no single starting point to measure distance from.
+      async function buildLineageWeb() {
         lineageLayer.removeAll();
 
         const gravesResult = await gravesLayer.queryFeatures({
