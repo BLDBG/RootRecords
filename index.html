@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>RootRecords</title>
+    // - I opted to use the latest JS SDK (5.1) - /
     <link rel="stylesheet" href="https://js.arcgis.com/5.1/esri/themes/light/main.css" />
     <style>
       html, body, #viewDiv {
@@ -242,19 +243,30 @@
     <!-- Add Site trigger button -->
     <button id="addSiteTrigger">＋ Add Site</button>
 
-    <!-- Lineage web toggle (show all) -->
-    <button id="lineageToggle">⬡ Show All Family Web</button>
-
-    <!-- Info card for Show All Family Web -->
-    <div id="lineageInfo" style="
-      background:white; border-radius:4px;
-      box-shadow:0 1px 4px rgba(0,0,0,0.2);
-      padding:10px 12px; font-family:'Georgia',serif;
-      font-size:11px; color:#555; line-height:1.6;
-      max-width:200px;
-    ">
-      <strong style="display:block; color:#1a1a2e; font-size:11px; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:4px;">💡 Show All Family Web</strong>
-      Draws connection lines between all graves with known parent–child relationships — no filter required. Use <em>Filter by Person</em> to trace a specific individual's lineage.
+    <!-- Lineage web toggle (show all) with hover tooltip -->
+    <div id="lineageToggleWrap" style="position:relative; display:inline-block;">
+      <button id="lineageToggle">⬡ Show All Family Web</button>
+      <span id="lineageInfoIcon" style="
+        display:inline-flex; align-items:center; justify-content:center;
+        width:16px; height:16px; border-radius:50%;
+        background:#1a1a2e; color:#e8d5b0;
+        font-size:10px; font-weight:bold; cursor:default;
+        margin-left:4px; vertical-align:middle;
+        font-family:'Georgia',serif;
+      ">i</span>
+      <div id="lineageTooltip" style="
+        display:none; position:absolute;
+        left:0; top:calc(100% + 6px);
+        width:220px; background:white;
+        border-radius:4px; padding:10px 12px;
+        box-shadow:0 2px 8px rgba(0,0,0,0.2);
+        font-family:'Georgia',serif; font-size:11px;
+        color:#555; line-height:1.6; z-index:999;
+        pointer-events:none;
+      ">
+        <strong style="display:block; color:#1a1a2e; font-size:11px; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:4px;">Show All Family Web</strong>
+        Draws connection lines between all graves with known parent–child relationships — no filter required. Use <em>Filter by Person</em> to trace a specific individual's lineage with generation coloring.
+      </div>
     </div>
 
     <!-- Map click instruction banner -->
@@ -1046,8 +1058,13 @@
       const labelsLayer = new GraphicsLayer({ title: "Family Labels", listMode: "hide" });
       map.add(lineageLayer);
       map.add(labelsLayer);
-      view.ui.add(document.getElementById("lineageToggle"), "top-left");
-      view.ui.add(document.getElementById("lineageInfo"), "top-left");
+      view.ui.add(document.getElementById("lineageToggleWrap"), "top-left");
+
+      // Show tooltip on hover over the info icon
+      const infoIcon = document.getElementById("lineageInfoIcon");
+      const tooltip = document.getElementById("lineageTooltip");
+      infoIcon.addEventListener("mouseenter", () => tooltip.style.display = "block");
+      infoIcon.addEventListener("mouseleave", () => tooltip.style.display = "none");
       let lineageVisible = false;
 
       // Ancestor lines are red tones (getting lighter with each generation back)
