@@ -612,7 +612,7 @@
       // to navigating the app.
       const searchPanel = document.getElementById("searchPanel");
       searchPanel.style.cssText += `
-        position:fixed; top:110px; right:10px; left:auto; z-index:200;
+        position:fixed; top:158px; right:10px; left:auto; z-index:200;
         width:280px; display:none; border-radius:6px;
         box-shadow:0 2px 12px rgba(0,0,0,0.25);
       `;
@@ -634,6 +634,15 @@
       const tooltip = document.getElementById("lineageTooltip");
       infoIcon.addEventListener("mouseenter", () => tooltip.style.display = "block");
       infoIcon.addEventListener("mouseleave", () => tooltip.style.display = "none");
+
+      // I set all layers to invisible on load to reduce visual clutter —
+      // the user can turn on whichever layers they need using the toggles.
+      gravesLayer.visible = false;
+      birthplaceLayer.visible = false;
+      houseLayer.visible = false;
+      document.getElementById("toggleGraves").checked = false;
+      document.getElementById("toggleBirthplaces").checked = false;
+      document.getElementById("toggleHouses").checked = false;
 
       // I added layer visibility toggles so a user can isolate one site type
       // at a time — for example, showing only graves when working in a cemetery,
@@ -1497,3 +1506,4 @@
     </script>
   </body>
 </html>
+
