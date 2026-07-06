@@ -403,7 +403,6 @@
       import Search from "https://js.arcgis.com/5.1/@arcgis/core/widgets/Search.js";
       import Expand from "https://js.arcgis.com/5.1/@arcgis/core/widgets/Expand.js";
       import Legend from "https://js.arcgis.com/5.1/@arcgis/core/widgets/Legend.js";
-      import Editor from "https://js.arcgis.com/5.1/@arcgis/core/widgets/Editor.js";
       import BasemapGallery from "https://js.arcgis.com/5.1/@arcgis/core/widgets/BasemapGallery.js";
       import { on } from "https://js.arcgis.com/5.1/@arcgis/core/core/reactiveUtils.js";
 
@@ -589,8 +588,6 @@
       // I added standard Esri navigation widgets (Home, Locate, Search) to give
       // users familiar map controls. The Search widget allows address lookup,
       // which is useful when trying to navigate to a specific cemetery or town.
-      // The Editor widget is wrapped in an Expand so it doesn't take up
-      // permanent screen space — users open it when they need to edit records.
       // The Basemap Gallery lets the user switch between topographic and
       // light gray canvas basemaps depending on whether they want terrain
       // context or a cleaner background for reading family web lines.
@@ -599,8 +596,6 @@
       view.ui.add(new Locate({ view }), "top-left");
       view.ui.add(new Expand({ view, content: new Search({ view }), expandIcon: "search", group: "top-right" }), "top-right");
       view.ui.add(new Expand({ view, content: new Legend({ view }), expandIcon: "legend", expandTooltip: "Legend", group: "top-right" }), "top-right");
-      const editor = new Editor({ view });
-      const editorExpand = new Expand({ view, content: editor, expandIcon: "edit", expandTooltip: "Edit existing records", group: "top-right" });
       view.ui.add(editorExpand, "top-right");
       view.ui.add(new Expand({ view, content: new BasemapGallery({ view }), expandIcon: "basemap", expandTooltip: "Change basemap", group: "top-right" }), "top-right");
       view.ui.add(document.getElementById("filterBtnWrap"), "top-right");
@@ -778,7 +773,6 @@
             targetLayer = l; break;
           }
         }
-        if (event.action.id === "edit-record") { editorExpand.expanded = true; view.popup.close(); }
         if (event.action.id === "delete-record") {
           const name = feature.attributes.person_id || "this feature";
           if (!confirm(`Delete record for "${name}"? This cannot be undone.`)) return;
@@ -1163,7 +1157,7 @@
         [170, 170, 230, 140]
       ];
 
-      // ── Add a name label graphic at a point ──
+      //  Add a name label graphic at a point
       function addLabel(name, point, labeledNames) {
         const displayName = name.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
         if (labeledNames.has(displayName)) return;
