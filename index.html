@@ -261,7 +261,7 @@
       ">i</span>
       <div id="filterTooltip" style="
         display:none; position:absolute;
-        left:0; top:calc(100% + 6px);
+        right:0; left:auto; top:calc(100% + 6px);
         width:220px; background:white;
         border-radius:4px; padding:10px 12px;
         box-shadow:0 2px 8px rgba(0,0,0,0.2);
@@ -602,9 +602,9 @@
       const editorExpand = new Expand({ view, content: editor, expandIcon: "edit", expandTooltip: "Edit existing records", group: "top-right" });
       view.ui.add(editorExpand, "top-right");
       view.ui.add(new Expand({ view, content: new BasemapGallery({ view }), expandIcon: "basemap", expandTooltip: "Change basemap", group: "top-right" }), "top-right");
+      view.ui.add(document.getElementById("filterBtnWrap"), "top-right");
       view.ui.add(document.getElementById("layerToggle"), "bottom-left");
       view.ui.add(document.getElementById("addSiteTrigger"), "top-left");
-      view.ui.add(document.getElementById("filterBtnWrap"), "top-left");
 
       // Wire up the Filter by Person text button to show/hide the search panel
       // as a floating panel rather than an Expand widget icon — I made this change
@@ -612,7 +612,7 @@
       // to navigating the app.
       const searchPanel = document.getElementById("searchPanel");
       searchPanel.style.cssText += `
-        position:fixed; top:110px; left:10px; z-index:200;
+        position:fixed; top:110px; right:10px; left:auto; z-index:200;
         width:280px; display:none; border-radius:6px;
         box-shadow:0 2px 12px rgba(0,0,0,0.25);
       `;
