@@ -693,7 +693,6 @@
         document.getElementById("traceWebBtn").style.display = "none";
         document.getElementById("webLegend").style.display = "none";
         document.getElementById("browseResults").style.display = "none";
-        view.padding = { right: 0 };
         lineageLayer.removeAll();
         lineageLayer.visible = false;
         lineageVisible = false;
@@ -1323,10 +1322,18 @@
           document.getElementById("webLegend").style.display = count > 0 ? "block" : "none";
 
           if (extent && count > 0) {
-            // Zoom to full extent of all connected graves with padding
-            await view.goTo(extent, { duration: 1200, easing: "ease-in-out" });
-            // Add padding so panel doesn't cover the graves
-            view.padding = { right: 300 };
+            // Build a proper extent object and zoom to it with a buffer
+            const buffer = 0.05; // ~3 miles buffer around the extent
+            await view.goTo({
+              target: {
+                type: "extent",
+                xmin: extent.xmin - buffer,
+                ymin: extent.ymin - buffer,
+                xmax: extent.xmax + buffer,
+                ymax: extent.ymax + buffer,
+                spatialReference: { wkid: 4326 }
+              }
+            }, { duration: 1200, easing: "ease-in-out" });
           } else {
             // No links — zoom to just the selected person's grave
             const gravesResult = await gravesLayer.queryFeatures({
@@ -1462,7 +1469,17 @@
 
             // Zoom to extent of all involved graves with padding
             if (extent && count > 0) {
-              await view.goTo(extent, { duration: 1200, easing: "ease-in-out" });
+              const buffer = 0.05;
+              await view.goTo({
+                target: {
+                  type: "extent",
+                  xmin: extent.xmin - buffer,
+                  ymin: extent.ymin - buffer,
+                  xmax: extent.xmax + buffer,
+                  ymax: extent.ymax + buffer,
+                  spatialReference: { wkid: 4326 }
+                }
+              }, { duration: 1200, easing: "ease-in-out" });
             }
           } catch (err) {
             console.error("Lineage build failed:", err);
