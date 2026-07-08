@@ -1101,6 +1101,13 @@
             if (dobVal) siteAttrs.DOB = new Date(dobVal).toISOString();
             if (currentSiteType === "grave" && dodVal) siteAttrs.DOD = new Date(dodVal).toISOString();
           }
+          // Copy Father and Mother to the site record when creating a new person
+          if (isNewPerson) {
+            const fatherVal = document.getElementById("pFather").value.trim();
+            const motherVal = document.getElementById("pMother").value.trim();
+            if (fatherVal) siteAttrs.Father = fatherVal;
+            if (motherVal) siteAttrs.Mother = motherVal;
+          }
 
           const layerMap = { grave: gravesLayer, birthplace: birthplaceLayer, house: houseLayer };
           const siteResult = await layerMap[currentSiteType].applyEdits({
@@ -1460,3 +1467,4 @@
     </script>
   </body>
 </html>
+
