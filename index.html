@@ -700,7 +700,7 @@
         try {
           const result = await personsTable.queryFeatures({
             where: "1=1",
-            outFields: ["Name", "DOB", "DOD", "GlobalID2"],
+            outFields: ["Name", "DOB", "DOD", "GlobalID_2"],
             orderByFields: ["Name ASC"],
             returnGeometry: false
           });
@@ -712,7 +712,7 @@
           result.features.forEach(f => {
             const attrs = f.attributes;
             const name = attrs.Name || "Unknown";
-            const globalId = attrs.GlobalID2 || null;
+            const globalId = attrs.GlobalID_2 || null;
             const dob = attrs.DOB ? new Date(attrs.DOB).getFullYear() : null;
             const dod = attrs.DOD ? new Date(attrs.DOD).getFullYear() : null;
             const dates = (dob || dod) ? ` <span style="color:#888; font-size:11px;">${dob || "?"}–${dod || "?"}</span>` : "";
