@@ -195,6 +195,41 @@
         letter-spacing: 0.5px;
       }
       #addSiteTrigger:hover { background: #f5f5f5; }
+    /* ── Large monitor responsiveness ── */
+    @media (min-width: 1920px) {
+      .esri-ui .esri-component {
+        transform: scale(0.8);
+        transform-origin: top left;
+      }
+      .esri-ui-top-right .esri-component {
+        transform-origin: top right;
+      }
+      .esri-ui-bottom-left .esri-component {
+        transform-origin: bottom left;
+      }
+      #header h1 { font-size: 16px; }
+      #header span { font-size: 10px; }
+      #header { height: 42px; }
+      #viewDiv { top: 42px; }
+    }
+
+    @media (min-width: 2560px) {
+      .esri-ui .esri-component {
+        transform: scale(0.7);
+        transform-origin: top left;
+      }
+      .esri-ui-top-right .esri-component {
+        transform-origin: top right;
+      }
+      .esri-ui-bottom-left .esri-component {
+        transform-origin: bottom left;
+      }
+      #header h1 { font-size: 14px; }
+      #header span { font-size: 9px; }
+      #header { height: 38px; }
+      #viewDiv { top: 38px; }
+    }
+
     </style>
   </head>
   <body>
@@ -403,6 +438,7 @@
       import Search from "https://js.arcgis.com/5.1/@arcgis/core/widgets/Search.js";
       import Expand from "https://js.arcgis.com/5.1/@arcgis/core/widgets/Expand.js";
       import Legend from "https://js.arcgis.com/5.1/@arcgis/core/widgets/Legend.js";
+      import Editor from "https://js.arcgis.com/5.1/@arcgis/core/widgets/Editor.js";
       import BasemapGallery from "https://js.arcgis.com/5.1/@arcgis/core/widgets/BasemapGallery.js";
       import { on } from "https://js.arcgis.com/5.1/@arcgis/core/core/reactiveUtils.js";
 
@@ -575,9 +611,9 @@
 
       // I centered the initial view on Kentucky since that is where I intend
       // to conduct my genealogy fieldwork in September. Zoom level 7 shows
-      // the full state.
+      // the full state, giving context before drilling into specific counties.
       const map = new Map({
-        basemap: "gray-vector",
+        basemap: "topo-vector",
         layers: [gravesLayer, birthplaceLayer, houseLayer]
       });
       const view = new MapView({
@@ -588,20 +624,24 @@
       // I added standard Esri navigation widgets (Home, Locate, Search) to give
       // users familiar map controls. The Search widget allows address lookup,
       // which is useful when trying to navigate to a specific cemetery or town.
+      // The Editor widget is wrapped in an Expand so it doesn't take up
+      // permanent screen space — users open it when they need to edit records.
       // The Basemap Gallery lets the user switch between topographic and
       // light gray canvas basemaps depending on whether they want terrain
       // context or a cleaner background for reading family web lines.
-      // I'm concerned that their might be a bit too much clutter at the moment however.
       view.ui.add(new Home({ view }), "top-left");
       view.ui.add(new Locate({ view }), "top-left");
       view.ui.add(new Expand({ view, content: new Search({ view }), expandIcon: "search", group: "top-right" }), "top-right");
       view.ui.add(new Expand({ view, content: new Legend({ view }), expandIcon: "legend", expandTooltip: "Legend", group: "top-right" }), "top-right");
+      const editor = new Editor({ view });
+      const editorExpand = new Expand({ view, content: editor, expandIcon: "edit", expandTooltip: "Edit existing records", group: "top-right" });
+      view.ui.add(editorExpand, "top-right");
       view.ui.add(new Expand({ view, content: new BasemapGallery({ view }), expandIcon: "basemap", expandTooltip: "Change basemap", group: "top-right" }), "top-right");
       view.ui.add(document.getElementById("filterBtnWrap"), "top-right");
       view.ui.add(document.getElementById("layerToggle"), "bottom-left");
       view.ui.add(document.getElementById("addSiteTrigger"), "top-left");
 
-      // Filter by Person text button to show/hide the search panel
+      // Wire up the Filter by Person text button to show/hide the search panel
       // as a floating panel rather than an Expand widget icon — I made this change
       // because the filter icon was too easy to miss and the feature is central
       // to navigating the app.
@@ -655,7 +695,7 @@
       document.getElementById("toggleBirthplaces").addEventListener("change", e => birthplaceLayer.visible = e.target.checked);
       document.getElementById("toggleHouses").addEventListener("change", e => houseLayer.visible = e.target.checked);
 
-      // The Filter by Person panel has two purposes:
+      // The Filter by Person panel serves two purposes:
       // 1. It hides all records except those belonging to the typed individual,
       //    making it easy to see all the sites associated with one person.
       // 2. It exposes the "Trace Family Web" button which draws bidirectional
@@ -663,7 +703,6 @@
       // I also added a Browse button so users can scroll all existing person
       // records alphabetically — useful when you can't remember the exact spelling
       // of a name, or want to explore what's already been recorded.
-      // This part of the application was completely new territory for me.
       let currentFilterName = null;
 
       function applyFilter(name) {
@@ -772,6 +811,7 @@
             targetLayer = l; break;
           }
         }
+        if (event.action.id === "edit-record") { editorExpand.expanded = true; view.popup.close(); }
         if (event.action.id === "delete-record") {
           const name = feature.attributes.person_id || "this feature";
           if (!confirm(`Delete record for "${name}"? This cannot be undone.`)) return;
@@ -1141,8 +1181,6 @@
       // This color split gives an immediate visual sense of direction —
       // red lines lead into the past, blue lines lead toward the present.
       // Line width also decreases slightly with each generation to reinforce distance.
-      // I will most likely revisit this in the future as I feel like, in the case of some 
-      // ancestors, the map looks far too cluttered if there are multiple children involved. 
       const ancestorColors = [
         [100, 0, 0, 230],
         [160, 40, 40, 200],
@@ -1156,7 +1194,7 @@
         [170, 170, 230, 140]
       ];
 
-      //  Add a name label graphic at a point
+      // ── Add a name label graphic at a point ──
       function addLabel(name, point, labeledNames) {
         const displayName = name.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
         if (labeledNames.has(displayName)) return;
@@ -1514,4 +1552,3 @@
     </script>
   </body>
 </html>
-
