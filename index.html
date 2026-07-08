@@ -919,9 +919,12 @@
               // (all graves in same cemetery are close enough)
               placedPoint = result.features[0].geometry;
 
-              document.getElementById("coordDisplay").textContent = `📍 ${avgLat.toFixed(5)}, ${avgLon.toFixed(5)}`;
+              document.getElementById("coordDisplay").textContent = `📍 ${result.features[0].geometry.latitude.toFixed(5)}, ${result.features[0].geometry.longitude.toFixed(5)}`;
               clickBanner.classList.remove("visible");
               if (mapClickHandler) { mapClickHandler.remove(); mapClickHandler = null; }
+
+              // Zoom to the cemetery location
+              view.goTo({ target: placedPoint, zoom: 16 }, { duration: 1000, easing: "ease-in-out" });
 
               // Pre-fill cemetery name and advance to step 3
               buildSiteFields();
@@ -1457,3 +1460,4 @@
     </script>
   </body>
 </html>
+
