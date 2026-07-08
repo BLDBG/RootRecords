@@ -1128,10 +1128,28 @@
           ? gravesByGlobalId[startGlobalId]
           : gravesByName[startKey];
 
-        if (startPoint) addLabel(startKey, startPoint, labeledNames, [26, 26, 46, 255]);
+        // Label the starting person with a prominent halo to distinguish them
+        // from the ancestor/descendant labels around them.
+        if (startPoint) {
+          labelsLayer.add(new Graphic({
+            geometry: startPoint,
+            symbol: {
+              type: "text",
+              color: [26, 26, 46, 255],
+              haloColor: [232, 213, 176, 255],
+              haloSize: "4px",
+              text: startName.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
+              font: { size: 11, family: "Georgia", weight: "bold" },
+              horizontalAlignment: "center", xoffset: 0, yoffset: 14
+            }
+          }));
+          labeledNames.add(startName.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "));
+        }
 
         function traceAncestors(name, generation) {
-          if (generation > 4 || visitedAncestors.has(name) || !name) return;
+          // I limit ancestor tracing to 2 generations (parents and grandparents)
+          // to avoid visual clutter as the dataset grows with large families.
+          if (generation > 2 || visitedAncestors.has(name) || !name) return;
           visitedAncestors.add(name);
           const childPoint = gravesByName[name];
           const person = personsByName[name];
@@ -1355,4 +1373,5 @@
     </script>
   </body>
 </html>
+
 
