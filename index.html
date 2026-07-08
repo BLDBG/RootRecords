@@ -607,10 +607,14 @@
         document.getElementById("lineageTooltip").style.display = "none";
       });
 
-      // All layers off on load to reduce visual clutter.
-      gravesLayer.visible = false;
+      // Graves visible on load — the primary layer for this application.
+      // Birthplaces and Houses off by default to reduce initial clutter.
+      gravesLayer.visible = true;
       birthplaceLayer.visible = false;
       houseLayer.visible = false;
+      document.getElementById("toggleGraves").checked = true;
+      document.getElementById("toggleBirthplaces").checked = false;
+      document.getElementById("toggleHouses").checked = false;
 
       // Layer visibility toggles.
       document.getElementById("toggleGraves").addEventListener("change", e => gravesLayer.visible = e.target.checked);
@@ -1467,5 +1471,6 @@
     </script>
   </body>
 </html>
+
 
 
