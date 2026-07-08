@@ -535,8 +535,8 @@
       });
 
       // The Persons table is non-spatial — it stores biographical data and
-      // links to site records via GlobalID2 (the system-managed GlobalID field).
-      // Phase 1: Graves.person_globalid = Persons.GlobalID2 for robust linking
+      // links to site records via GlobalID_2 (the system-managed GlobalID field).
+      // Phase 1: Graves.person_globalid = Persons.GlobalID_2 for robust linking
       // that survives name changes.
       const personsTable = new FeatureLayer({
         url: PERSONS_URL, title: "Persons", outFields: ["*"]
@@ -608,9 +608,9 @@
 
       // ── Filter by Person ──
       // Phase 1: filter still uses person_id (name) for display/map filtering,
-      // but the trace now uses person_globalid → GlobalID2 for robust linking.
+      // but the trace now uses person_globalid → GlobalID_2 for robust linking.
       let currentFilterName = null;
-      let currentFilterGlobalId = null; // Phase 1: store GlobalID2 for trace
+      let currentFilterGlobalId = null; // Phase 1: store GlobalID_2 for trace
 
       function applyFilter(name, globalId) {
         currentFilterName = name;
@@ -637,14 +637,14 @@
       document.getElementById("searchBtn").addEventListener("click", async () => {
         const name = document.getElementById("personSearch").value.trim();
         if (!name) return;
-        // Look up GlobalID2 for this person name
+        // Look up GlobalID_2 for this person name
         try {
           const result = await personsTable.queryFeatures({
             where: `Name LIKE '%${name}%'`,
-            outFields: ["Name", "GlobalID2"],
+            outFields: ["Name", "GlobalID_2"],
             returnGeometry: false
           });
-          const globalId = result.features.length > 0 ? result.features[0].attributes.GlobalID2 : null;
+          const globalId = result.features.length > 0 ? result.features[0].attributes.GlobalID_2 : null;
           applyFilter(name, globalId);
         } catch (err) {
           applyFilter(name, null);
@@ -658,10 +658,10 @@
           try {
             const result = await personsTable.queryFeatures({
               where: `Name LIKE '%${name}%'`,
-              outFields: ["Name", "GlobalID2"],
+              outFields: ["Name", "GlobalID_2"],
               returnGeometry: false
             });
-            const globalId = result.features.length > 0 ? result.features[0].attributes.GlobalID2 : null;
+            const globalId = result.features.length > 0 ? result.features[0].attributes.GlobalID_2 : null;
             applyFilter(name, globalId);
           } catch (err) {
             applyFilter(name, null);
@@ -688,7 +688,7 @@
       });
 
       // Browse all persons — shows alphabetical list with DOB/DOD when available.
-      // Clicking a name calls applyFilter with the person's GlobalID2.
+      // Clicking a name calls applyFilter with the person's GlobalID_2.
       document.getElementById("browseBtn").addEventListener("click", async () => {
         const resultsDiv = document.getElementById("browseResults");
         if (resultsDiv.style.display === "block") {
@@ -755,7 +755,7 @@
       // ════════════════════════════════════════════
       // CUSTOM ADD SITE WORKFLOW
       // Simultaneously writes a site feature and a Persons table record,
-      // linking them via person_globalid (stores Persons.GlobalID2).
+      // linking them via person_globalid (stores Persons.GlobalID_2).
       // This ensures name changes never break the site-to-person link.
       // ════════════════════════════════════════════
       let currentSiteType = null;
@@ -909,7 +909,7 @@
         document.getElementById("existingPersonFields").style.display = "block";
       });
 
-      // Search existing persons — uses GlobalID2 as the linking key.
+      // Search existing persons — uses GlobalID_2 as the linking key.
       document.getElementById("searchExistingBtn").addEventListener("click", async () => {
         const query = document.getElementById("existingPersonSearch").value.trim();
         if (!query) return;
@@ -938,8 +938,8 @@
             div.addEventListener("click", () => {
               document.querySelectorAll(".person-result").forEach(r => r.classList.remove("selected"));
               div.classList.add("selected");
-              // Phase 1: use GlobalID2 as the linking key, not GlobalID
-              selectedExistingPerson = { globalId: attrs.GlobalID2, name: attrs.Name };
+              // Phase 1: use GlobalID_2 as the linking key, not GlobalID
+              selectedExistingPerson = { globalId: attrs.GlobalID_2, name: attrs.Name };
               const display = document.getElementById("selectedPersonDisplay");
               display.textContent = `✓ Selected: ${attrs.Name}`;
               display.style.display = "block";
@@ -953,7 +953,7 @@
       });
 
       // Submit record — writes site feature and Persons record simultaneously.
-      // Phase 1: person_globalid on the site stores Persons.GlobalID2 so that
+      // Phase 1: person_globalid on the site stores Persons.GlobalID_2 so that
       // name changes never break the link between a grave and its person record.
       document.getElementById("submitRecord").addEventListener("click", async () => {
         if (!placedPoint) { setStatus("No location set — go back and place a point.", "error"); return; }
@@ -984,13 +984,13 @@
             const personResult = await personsTable.applyEdits({ addFeatures: [{ attributes: personAttrs }] });
             if (personResult.addFeatureResults[0].error) throw personResult.addFeatureResults[0].error;
 
-            // Query back the new record to get its GlobalID2
+            // Query back the new record to get its GlobalID_2
             const newOid = personResult.addFeatureResults[0].objectId;
             const personQuery = await personsTable.queryFeatures({
-              where: `OBJECTID = ${newOid}`, outFields: ["GlobalID2", "Name"], returnGeometry: false
+              where: `OBJECTID = ${newOid}`, outFields: ["GlobalID_2", "Name"], returnGeometry: false
             });
             if (personQuery.features.length > 0) {
-              personGlobalId = personQuery.features[0].attributes.GlobalID2;
+              personGlobalId = personQuery.features[0].attributes.GlobalID_2;
             }
           } else {
             if (!selectedExistingPerson) {
@@ -1002,7 +1002,7 @@
             personName = selectedExistingPerson.name;
           }
 
-          // Build site attributes — person_globalid stores GlobalID2 from Persons
+          // Build site attributes — person_globalid stores GlobalID_2 from Persons
           const siteAttrs = { person_id: personName, person_globalid: personGlobalId };
           (siteFieldDefs[currentSiteType] || []).forEach(def => {
             const el = document.getElementById(def.id);
@@ -1076,7 +1076,7 @@
       }
 
       // traceFromPerson — Phase 1 upgrade.
-      // Now uses person_globalid (= Persons.GlobalID2) to look up grave geometry
+      // Now uses person_globalid (= Persons.GlobalID_2) to look up grave geometry
       // for the selected person, making the start point immune to name changes.
       // Ancestor/descendant traversal still uses Father/Mother text fields (Phase 2).
       async function traceFromPerson(startName, startGlobalId) {
@@ -1085,7 +1085,7 @@
 
         // Query all graves — build two lookups:
         // gravesByName: for ancestor/descendant name matching (Phase 2 will replace this)
-        // gravesByGlobalId: Phase 1 — find the selected person's grave via GlobalID2
+        // gravesByGlobalId: Phase 1 — find the selected person's grave via GlobalID_2
         const gravesResult = await gravesLayer.queryFeatures({
           where: "1=1", outFields: ["person_id", "person_globalid"], returnGeometry: true
         });
@@ -1100,7 +1100,7 @@
 
         // Query all persons for ancestor/descendant traversal
         const personsResult = await personsTable.queryFeatures({
-          where: "1=1", outFields: ["Name", "Father", "Mother", "GlobalID2"], returnGeometry: false
+          where: "1=1", outFields: ["Name", "Father", "Mother", "GlobalID_2"], returnGeometry: false
         });
         const personsByName = {};
         const childrenByParent = {};
@@ -1122,7 +1122,7 @@
         const labeledNames = new Set();
         const startKey = startName.trim().toLowerCase();
 
-        // Phase 1: find starting grave via GlobalID2 link if available,
+        // Phase 1: find starting grave via GlobalID_2 link if available,
         // fall back to name matching if not.
         const startPoint = (startGlobalId && gravesByGlobalId[startGlobalId])
           ? gravesByGlobalId[startGlobalId]
@@ -1190,7 +1190,7 @@
           });
         }
 
-        // Use GlobalID2-linked start point for initial label,
+        // Use GlobalID_2-linked start point for initial label,
         // then use name for ancestor/descendant traversal
         traceAncestors(startKey, 1);
         traceDescendants(startKey, 1);
@@ -1212,14 +1212,15 @@
         return { count: lineCount, extent, startPoint };
       }
 
-      // Trace button — passes both name and GlobalID2 to traceFromPerson.
+      // Trace button — passes both name and GlobalID_2 to traceFromPerson.
       document.getElementById("traceWebBtn").addEventListener("click", async () => {
         if (!currentFilterName) return;
         const btn = document.getElementById("traceWebBtn");
         btn.disabled = true;
         btn.textContent = "⬡ Tracing...";
         try {
-          const { count, extent, startPoint } = await traceFromPerson(currentFilterName);
+          console.log("Tracing from:", currentFilterName, "GlobalID:", currentFilterGlobalId);
+          const { count, extent, startPoint } = await traceFromPerson(currentFilterName, currentFilterGlobalId);
           lineageLayer.visible = true;
           lineageVisible = true;
           btn.textContent = count > 0 ? `⬡ ${count} links traced` : "⬡ No links found";
@@ -1241,6 +1242,9 @@
           }
         } catch (err) {
           console.error("Trace failed:", err);
+          console.error("Trace error details:", JSON.stringify(err));
+          console.error("Trace error message:", err?.message);
+          console.error("Trace error details prop:", err?.details);
           btn.textContent = "⬡ Trace Family Web";
         }
         btn.disabled = false;
