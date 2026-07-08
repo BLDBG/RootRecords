@@ -1219,7 +1219,7 @@
         btn.disabled = true;
         btn.textContent = "⬡ Tracing...";
         try {
-          const { count, extent, startPoint } = await traceFromPerson(currentFilterName, currentFilterGlobalId);
+          const { count, extent, startPoint } = await traceFromPerson(currentFilterName, currentFilterGlobalID_2);
           lineageLayer.visible = true;
           lineageVisible = true;
           btn.textContent = count > 0 ? `⬡ ${count} links traced` : "⬡ No links found";
