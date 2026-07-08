@@ -119,7 +119,7 @@
       .step-indicator {
         display: flex; gap: 6px; margin-bottom: 14px; align-items: center;
       }
-      .step { 
+      .step {
         flex: 1; height: 4px; background: #e0e0e0; border-radius: 2px;
         transition: background 0.2s;
       }
@@ -134,9 +134,7 @@
       }
 
       /* Person toggle */
-      .person-toggle {
-        display: flex; gap: 8px; margin-bottom: 12px;
-      }
+      .person-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
       .person-toggle-btn {
         flex: 1; padding: 8px; border: 2px solid #ddd; border-radius: 4px;
         background: white; cursor: pointer; font-family: 'Georgia', serif;
@@ -195,41 +193,26 @@
         letter-spacing: 0.5px;
       }
       #addSiteTrigger:hover { background: #f5f5f5; }
-    /* ── Large monitor responsiveness ── */
-    @media (min-width: 1920px) {
-      .esri-ui .esri-component {
-        transform: scale(0.8);
-        transform-origin: top left;
-      }
-      .esri-ui-top-right .esri-component {
-        transform-origin: top right;
-      }
-      .esri-ui-bottom-left .esri-component {
-        transform-origin: bottom left;
-      }
-      #header h1 { font-size: 16px; }
-      #header span { font-size: 10px; }
-      #header { height: 42px; }
-      #viewDiv { top: 42px; }
-    }
 
-    @media (min-width: 2560px) {
-      .esri-ui .esri-component {
-        transform: scale(0.7);
-        transform-origin: top left;
+      /* ── Large monitor responsiveness ── */
+      @media (min-width: 1920px) {
+        .esri-ui .esri-component { transform: scale(0.8); transform-origin: top left; }
+        .esri-ui-top-right .esri-component { transform-origin: top right; }
+        .esri-ui-bottom-left .esri-component { transform-origin: bottom left; }
+        #header h1 { font-size: 16px; }
+        #header span { font-size: 10px; }
+        #header { height: 42px; }
+        #viewDiv { top: 42px; }
       }
-      .esri-ui-top-right .esri-component {
-        transform-origin: top right;
+      @media (min-width: 2560px) {
+        .esri-ui .esri-component { transform: scale(0.7); transform-origin: top left; }
+        .esri-ui-top-right .esri-component { transform-origin: top right; }
+        .esri-ui-bottom-left .esri-component { transform-origin: bottom left; }
+        #header h1 { font-size: 14px; }
+        #header span { font-size: 9px; }
+        #header { height: 38px; }
+        #viewDiv { top: 38px; }
       }
-      .esri-ui-bottom-left .esri-component {
-        transform-origin: bottom left;
-      }
-      #header h1 { font-size: 14px; }
-      #header span { font-size: 9px; }
-      #header { height: 38px; }
-      #viewDiv { top: 38px; }
-    }
-
     </style>
   </head>
   <body>
@@ -243,9 +226,9 @@
     <!-- Layer toggle -->
     <div id="layerToggle">
       <b>Layers</b>
-      <label><input type="checkbox" id="toggleGraves" checked /> Graves</label>
-      <label><input type="checkbox" id="toggleBirthplaces" checked /> Birthplaces</label>
-      <label><input type="checkbox" id="toggleHouses" checked /> Houses &amp; Sites</label>
+      <label><input type="checkbox" id="toggleGraves" /> Graves</label>
+      <label><input type="checkbox" id="toggleBirthplaces" /> Birthplaces</label>
+      <label><input type="checkbox" id="toggleHouses" /> Houses &amp; Sites</label>
     </div>
 
     <!-- Person filter -->
@@ -284,16 +267,14 @@
         box-shadow:0 1px 4px rgba(0,0,0,0.25); cursor:pointer;
         font-family:'Georgia',serif; font-size:12px; color:#1a1a2e;
         border:none; display:flex; align-items:center; gap:6px;
-        letter-spacing:0.5px;
-      ">⌕ Filter by Person</button>
+        letter-spacing:0.5px;">⌕ Filter by Person</button>
       <span id="filterInfoIcon" style="
         display:inline-flex; align-items:center; justify-content:center;
         width:16px; height:16px; border-radius:50%;
         background:#1a1a2e; color:#e8d5b0;
         font-size:10px; font-weight:bold; cursor:default;
         margin-left:4px; vertical-align:middle;
-        font-family:'Georgia',serif;
-      ">i</span>
+        font-family:'Georgia',serif;">i</span>
       <div id="filterTooltip" style="
         display:none; position:absolute;
         right:0; left:auto; top:calc(100% + 6px);
@@ -302,14 +283,13 @@
         box-shadow:0 2px 8px rgba(0,0,0,0.2);
         font-family:'Georgia',serif; font-size:11px;
         color:#555; line-height:1.6; z-index:999;
-        pointer-events:none;
-      ">
+        pointer-events:none;">
         <strong style="display:block; color:#1a1a2e; font-size:11px; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:4px;">Filter by Person</strong>
         Search or browse all recorded individuals. Selecting a person filters the map to their sites and unlocks the <em>Trace Family Web</em> button to draw their ancestral and descendant lineage lines.
       </div>
     </div>
 
-    <!-- Lineage web toggle (show all) with hover tooltip -->
+    <!-- Lineage web toggle with hover tooltip -->
     <div id="lineageToggleWrap" style="position:relative; display:inline-block;">
       <button id="lineageToggle">⬡ Show All Family Web</button>
       <span id="lineageInfoIcon" style="
@@ -318,8 +298,7 @@
         background:#1a1a2e; color:#e8d5b0;
         font-size:10px; font-weight:bold; cursor:default;
         margin-left:4px; vertical-align:middle;
-        font-family:'Georgia',serif;
-      ">i</span>
+        font-family:'Georgia',serif;">i</span>
       <div id="lineageTooltip" style="
         display:none; position:absolute;
         left:0; top:calc(100% + 6px);
@@ -328,8 +307,7 @@
         box-shadow:0 2px 8px rgba(0,0,0,0.2);
         font-family:'Georgia',serif; font-size:11px;
         color:#555; line-height:1.6; z-index:999;
-        pointer-events:none;
-      ">
+        pointer-events:none;">
         <strong style="display:block; color:#1a1a2e; font-size:11px; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:4px;">Show All Family Web</strong>
         Draws connection lines between all graves with known parent–child relationships — no filter required. Use <em>Filter by Person</em> to trace a specific individual's lineage with generation coloring.
       </div>
@@ -345,8 +323,6 @@
         <button id="closePanel" title="Cancel">✕</button>
       </div>
       <div class="panel-body">
-
-        <!-- Step indicator -->
         <div class="step-indicator">
           <div class="step active" id="step1bar"></div>
           <div class="step" id="step2bar"></div>
@@ -357,41 +333,28 @@
         <div id="step1">
           <div class="section-label">Select Site Type</div>
           <div class="site-type-grid">
-            <button class="site-type-btn" data-type="grave">
-              <span class="icon">⚰</span>Grave
-            </button>
-            <button class="site-type-btn" data-type="birthplace">
-              <span class="icon">🏠</span>Birthplace
-            </button>
-            <button class="site-type-btn" data-type="house">
-              <span class="icon">🏡</span>House / Site
-            </button>
+            <button class="site-type-btn" data-type="grave"><span class="icon">⚰</span>Grave</button>
+            <button class="site-type-btn" data-type="birthplace"><span class="icon">🏠</span>Birthplace</button>
+            <button class="site-type-btn" data-type="house"><span class="icon">🏡</span>House / Site</button>
           </div>
           <button class="rr-btn" id="proceedToPlace" disabled>Next: Place on Map →</button>
         </div>
 
-        <!-- STEP 2: Place point (auto-advances when map clicked) -->
+        <!-- STEP 2: Place point -->
         <div id="step2" style="display:none;">
           <div class="section-label">Place Location</div>
-          <p style="font-size:12px; color:#666; margin:0 0 10px;">
-            Click anywhere on the map to place the site. You can adjust the location before saving.
-          </p>
+          <p style="font-size:12px; color:#666; margin:0 0 10px;">Click anywhere on the map to place the site.</p>
           <div id="coordDisplay" style="font-size:11px; color:#888; margin-bottom:10px;"></div>
           <button class="rr-btn-secondary" id="backToStep1">← Back</button>
         </div>
 
         <!-- STEP 3: Fill in details -->
         <div id="step3" style="display:none;">
-
-          <!-- Site fields (dynamic per type) -->
           <div class="section-label" id="siteFieldsLabel">Site Details</div>
           <div id="siteFields"></div>
 
-          <!-- Person section -->
           <div class="section-label">Person Record</div>
-          <p style="font-size:11px; color:#888; margin:0 0 8px;">
-            Link this site to a person. Search first to avoid duplicates.
-          </p>
+          <p style="font-size:11px; color:#888; margin:0 0 8px;">Link this site to a person. Search first to avoid duplicates.</p>
           <div class="person-toggle">
             <button class="person-toggle-btn active" id="btnNewPerson">New Person</button>
             <button class="person-toggle-btn" id="btnExistingPerson">Existing Person</button>
@@ -421,13 +384,11 @@
             <button class="rr-btn" id="submitRecord" style="flex:2;">Save Record</button>
           </div>
         </div>
-
       </div>
     </div>
 
     <script type="module">
       // I am using the ArcGIS Maps SDK for JavaScript (v5.1) ES module syntax.
-      // This is the modern import pattern replacing the older AMD require() approach.
       import Map from "https://js.arcgis.com/5.1/@arcgis/core/Map.js";
       import MapView from "https://js.arcgis.com/5.1/@arcgis/core/views/MapView.js";
       import FeatureLayer from "https://js.arcgis.com/5.1/@arcgis/core/layers/FeatureLayer.js";
@@ -438,31 +399,20 @@
       import Search from "https://js.arcgis.com/5.1/@arcgis/core/widgets/Search.js";
       import Expand from "https://js.arcgis.com/5.1/@arcgis/core/widgets/Expand.js";
       import Legend from "https://js.arcgis.com/5.1/@arcgis/core/widgets/Legend.js";
-      import Editor from "https://js.arcgis.com/5.1/@arcgis/core/widgets/Editor.js";
       import BasemapGallery from "https://js.arcgis.com/5.1/@arcgis/core/widgets/BasemapGallery.js";
       import { on } from "https://js.arcgis.com/5.1/@arcgis/core/core/reactiveUtils.js";
 
-      // This is the base URL for my RootRecords hosted feature service on ArcGIS Online.
-      // All three feature classes (Birthplace/0, House/1, Graves/2) and the
-      // Persons table (index 3) live under this single service endpoint,
-      // which I published from a file geodatabase in ArcGIS Pro with
-      // relationship classes already defined between the layers.
+      // Base URL for the RootRecords hosted feature service on ArcGIS Online.
+      // Birthplace=0, House=1, Graves=2, Persons table=3.
       const SERVICE_URL = "https://services.arcgis.com/HRPe58bUyBqyyiCt/arcgis/rest/services/RootRecords/FeatureServer";
       const PERSONS_URL = `${SERVICE_URL}/3`;
 
-      // I added Edit and Delete actions to every popup so that a user can
-      // correct mistakes or remove test records without leaving the map view.
-      // The edit action opens the Editor widget pre-loaded with that feature,
-      // and the delete action shows a confirmation dialog before removing the record.
+      // Popup delete action — edit removed since Editor widget was removed.
       const popupActions = [
-        { title: "Edit record", id: "edit-record", className: "esri-icon-edit" },
         { title: "Delete record", id: "delete-record", className: "esri-icon-trash" }
       ];
 
-      // Each feature class has its own popup template showing only the fields
-      // relevant to that site type. I deliberately excluded system fields like
-      // GlobalID and person_globalid since those are internal linking keys
-      // that don't mean anything to the end user.
+      // Popup templates — one per site type, showing only relevant fields.
       const gravePopup = {
         title: "⚰ {person_id}", actions: popupActions,
         content: [{ type: "fields", fieldInfos: [
@@ -501,11 +451,8 @@
         ]}]
       };
 
-      // I chose distinct symbols for each site type so that at a glance a user
-      // can tell what kind of record they're looking at without clicking:
-      // squares for graves, circles for birthplaces, diamonds for houses.
-      // The color palette (navy, brown, olive) is muted and period-appropriate
-      // for a genealogy application rather than bright primary colors.
+      // Distinct symbols per site type — squares for graves, circles for
+      // birthplaces, diamonds for houses. Muted palette suits a genealogy theme.
       const graveRenderer = { type: "simple", symbol: {
         type: "simple-marker", style: "square", color: [26,26,46,220], size: "10px",
         outline: { color: [232,213,176], width: 1.5 }
@@ -519,38 +466,25 @@
         outline: { color: [255,255,255], width: 1.5 }
       }};
 
-      // I added clustering so that graves in the same cemetery don't overlap
-      // and become unclickable. The cluster radius is intentionally tight (8px)
-      // so that only features within roughly 500 feet of each other will group —
-      // in practice this means graves in the same cemetery plot will cluster
-      // while records in different locations remain separate.
+      // Tight cluster radius (~500ft) so only graves in the same cemetery cluster.
       const clusterConfig = {
-        type: "cluster",
-        clusterRadius: "8px",
+        type: "cluster", clusterRadius: "8px",
         popupTemplate: {
           title: "Cluster of {cluster_count} nearby graves",
           content: "Zoom in to see individual records.",
           fieldInfos: [{ fieldName: "cluster_count", label: "Total sites" }]
         },
-        clusterMinSize: "24px",
-        clusterMaxSize: "36px",
+        clusterMinSize: "24px", clusterMaxSize: "36px",
         labelingInfo: [{
           deconflictionStrategy: "none",
           labelExpressionInfo: { expression: "Text($feature.cluster_count, '#,###')" },
-          symbol: {
-            type: "text", color: "#ffffff",
-            font: { weight: "bold", family: "Georgia", size: "11px" }
-          },
+          symbol: { type: "text", color: "#ffffff", font: { weight: "bold", family: "Georgia", size: "11px" } },
           labelPlacement: "center-center"
         }]
       };
 
-      // Each feature layer points to a specific index within my RootRecords
-      // feature service. The formTemplate controls which fields appear in the
-      // built-in Editor widget, hiding system fields like GlobalID and
-      // person_globalid that are only used for internal record linking.
-      // editingEnabled: true allows the Editor widget to create, update,
-      // and delete records directly from the web app.
+      // Feature layers — one per site type. formTemplate controls which fields
+      // appear when editing, hiding system fields from the user.
       const gravesLayer = new FeatureLayer({
         url: `${SERVICE_URL}/2`, title: "Graves", outFields: ["*"],
         popupTemplate: gravePopup, renderer: graveRenderer, editingEnabled: true,
@@ -600,20 +534,17 @@
         ]}
       });
 
-      // The Persons table is non-spatial (no geometry) — it stores biographical
-      // data about individuals and links to the spatial site records via GlobalID.
-      // I keep it as a separate table rather than duplicating person fields on
-      // every site record so that if I correct someone's birth year, the fix
-      // only needs to happen in one place.
+      // The Persons table is non-spatial — it stores biographical data and
+      // links to site records via GlobalID2 (the system-managed GlobalID field).
+      // Phase 1: Graves.person_globalid = Persons.GlobalID2 for robust linking
+      // that survives name changes.
       const personsTable = new FeatureLayer({
         url: PERSONS_URL, title: "Persons", outFields: ["*"]
       });
 
-      // I centered the initial view on Kentucky since that is where I intend
-      // to conduct my genealogy fieldwork in September. Zoom level 7 shows
-      // the full state, giving context before drilling into specific counties.
+      // Map centered on Kentucky — where fieldwork will be conducted.
       const map = new Map({
-        basemap: "topo-vector",
+        basemap: "gray-vector",
         layers: [gravesLayer, birthplaceLayer, houseLayer]
       });
       const view = new MapView({
@@ -621,30 +552,18 @@
         popup: { dockEnabled: true, dockOptions: { position: "bottom-right", breakpoint: false } }
       });
 
-      // I added standard Esri navigation widgets (Home, Locate, Search) to give
-      // users familiar map controls. The Search widget allows address lookup,
-      // which is useful when trying to navigate to a specific cemetery or town.
-      // The Editor widget is wrapped in an Expand so it doesn't take up
-      // permanent screen space — users open it when they need to edit records.
-      // The Basemap Gallery lets the user switch between topographic and
-      // light gray canvas basemaps depending on whether they want terrain
-      // context or a cleaner background for reading family web lines.
+      // Standard navigation widgets.
       view.ui.add(new Home({ view }), "top-left");
       view.ui.add(new Locate({ view }), "top-left");
       view.ui.add(new Expand({ view, content: new Search({ view }), expandIcon: "search", group: "top-right" }), "top-right");
       view.ui.add(new Expand({ view, content: new Legend({ view }), expandIcon: "legend", expandTooltip: "Legend", group: "top-right" }), "top-right");
-      const editor = new Editor({ view });
-      const editorExpand = new Expand({ view, content: editor, expandIcon: "edit", expandTooltip: "Edit existing records", group: "top-right" });
-      view.ui.add(editorExpand, "top-right");
       view.ui.add(new Expand({ view, content: new BasemapGallery({ view }), expandIcon: "basemap", expandTooltip: "Change basemap", group: "top-right" }), "top-right");
       view.ui.add(document.getElementById("filterBtnWrap"), "top-right");
       view.ui.add(document.getElementById("layerToggle"), "bottom-left");
       view.ui.add(document.getElementById("addSiteTrigger"), "top-left");
+      view.ui.add(document.getElementById("lineageToggleWrap"), "top-left");
 
-      // Wire up the Filter by Person text button to show/hide the search panel
-      // as a floating panel rather than an Expand widget icon — I made this change
-      // because the filter icon was too easy to miss and the feature is central
-      // to navigating the app.
+      // Filter by Person panel — opens below the button using dynamic positioning.
       const searchPanel = document.getElementById("searchPanel");
       searchPanel.style.cssText += `
         position:fixed; z-index:200;
@@ -656,58 +575,48 @@
         if (isVisible) {
           searchPanel.style.display = "none";
         } else {
-          // Position panel directly below the button
-          const btn = document.getElementById("filterTrigger");
-          const rect = btn.getBoundingClientRect();
+          const rect = document.getElementById("filterTrigger").getBoundingClientRect();
           searchPanel.style.top = (rect.bottom + 6) + "px";
           searchPanel.style.right = (window.innerWidth - rect.right) + "px";
           searchPanel.style.display = "block";
         }
       });
 
-      // Filter tooltip hover
+      // Tooltip hover handlers.
       document.getElementById("filterInfoIcon").addEventListener("mouseenter", () => {
         document.getElementById("filterTooltip").style.display = "block";
       });
       document.getElementById("filterInfoIcon").addEventListener("mouseleave", () => {
         document.getElementById("filterTooltip").style.display = "none";
       });
+      document.getElementById("lineageInfoIcon").addEventListener("mouseenter", () => {
+        document.getElementById("lineageTooltip").style.display = "block";
+      });
+      document.getElementById("lineageInfoIcon").addEventListener("mouseleave", () => {
+        document.getElementById("lineageTooltip").style.display = "none";
+      });
 
-      // Lineage info tooltip hover
-      const infoIcon = document.getElementById("lineageInfoIcon");
-      const tooltip = document.getElementById("lineageTooltip");
-      infoIcon.addEventListener("mouseenter", () => tooltip.style.display = "block");
-      infoIcon.addEventListener("mouseleave", () => tooltip.style.display = "none");
-
-      // I set all layers to invisible on load to reduce visual clutter —
-      // the user can turn on whichever layers they need using the toggles.
+      // All layers off on load to reduce visual clutter.
       gravesLayer.visible = false;
       birthplaceLayer.visible = false;
       houseLayer.visible = false;
-      document.getElementById("toggleGraves").checked = false;
-      document.getElementById("toggleBirthplaces").checked = false;
-      document.getElementById("toggleHouses").checked = false;
 
-      // I added layer visibility toggles so a user can isolate one site type
-      // at a time — for example, showing only graves when working in a cemetery,
-      // or only birthplaces when researching migration patterns.
+      // Layer visibility toggles.
       document.getElementById("toggleGraves").addEventListener("change", e => gravesLayer.visible = e.target.checked);
       document.getElementById("toggleBirthplaces").addEventListener("change", e => birthplaceLayer.visible = e.target.checked);
       document.getElementById("toggleHouses").addEventListener("change", e => houseLayer.visible = e.target.checked);
 
-      // The Filter by Person panel serves two purposes:
-      // 1. It hides all records except those belonging to the typed individual,
-      //    making it easy to see all the sites associated with one person.
-      // 2. It exposes the "Trace Family Web" button which draws bidirectional
-      //    lineage lines from that person outward through ancestors and descendants.
-      // I also added a Browse button so users can scroll all existing person
-      // records alphabetically — useful when you can't remember the exact spelling
-      // of a name, or want to explore what's already been recorded.
+      // ── Filter by Person ──
+      // Phase 1: filter still uses person_id (name) for display/map filtering,
+      // but the trace now uses person_globalid → GlobalID2 for robust linking.
       let currentFilterName = null;
+      let currentFilterGlobalId = null; // Phase 1: store GlobalID2 for trace
 
-      function applyFilter(name) {
+      function applyFilter(name, globalId) {
         currentFilterName = name;
+        currentFilterGlobalId = globalId || null;
         document.getElementById("personSearch").value = name;
+        // Filter site layers by person_id name field for display
         const where = `person_id LIKE '%${name}%'`;
         gravesLayer.definitionExpression = where;
         birthplaceLayer.definitionExpression = where;
@@ -725,21 +634,45 @@
         document.getElementById("traceWebBtn").disabled = false;
       }
 
-      document.getElementById("searchBtn").addEventListener("click", () => {
+      document.getElementById("searchBtn").addEventListener("click", async () => {
         const name = document.getElementById("personSearch").value.trim();
-        if (name) applyFilter(name);
+        if (!name) return;
+        // Look up GlobalID2 for this person name
+        try {
+          const result = await personsTable.queryFeatures({
+            where: `Name LIKE '%${name}%'`,
+            outFields: ["Name", "GlobalID2"],
+            returnGeometry: false
+          });
+          const globalId = result.features.length > 0 ? result.features[0].attributes.GlobalID2 : null;
+          applyFilter(name, globalId);
+        } catch (err) {
+          applyFilter(name, null);
+        }
       });
 
-      document.getElementById("personSearch").addEventListener("keydown", e => {
+      document.getElementById("personSearch").addEventListener("keydown", async e => {
         if (e.key === "Enter") {
           const name = document.getElementById("personSearch").value.trim();
-          if (name) applyFilter(name);
+          if (!name) return;
+          try {
+            const result = await personsTable.queryFeatures({
+              where: `Name LIKE '%${name}%'`,
+              outFields: ["Name", "GlobalID2"],
+              returnGeometry: false
+            });
+            const globalId = result.features.length > 0 ? result.features[0].attributes.GlobalID2 : null;
+            applyFilter(name, globalId);
+          } catch (err) {
+            applyFilter(name, null);
+          }
         }
       });
 
       document.getElementById("clearBtn").addEventListener("click", () => {
         document.getElementById("personSearch").value = "";
         currentFilterName = null;
+        currentFilterGlobalId = null;
         gravesLayer.definitionExpression = "";
         birthplaceLayer.definitionExpression = "";
         houseLayer.definitionExpression = "";
@@ -754,7 +687,8 @@
         document.getElementById("lineageToggle").classList.remove("active");
       });
 
-      // ── Browse all persons ──
+      // Browse all persons — shows alphabetical list with DOB/DOD when available.
+      // Clicking a name calls applyFilter with the person's GlobalID2.
       document.getElementById("browseBtn").addEventListener("click", async () => {
         const resultsDiv = document.getElementById("browseResults");
         if (resultsDiv.style.display === "block") {
@@ -766,7 +700,7 @@
         try {
           const result = await personsTable.queryFeatures({
             where: "1=1",
-            outFields: ["Name", "DOB", "DOD"],
+            outFields: ["Name", "DOB", "DOD", "GlobalID2"],
             orderByFields: ["Name ASC"],
             returnGeometry: false
           });
@@ -778,6 +712,7 @@
           result.features.forEach(f => {
             const attrs = f.attributes;
             const name = attrs.Name || "Unknown";
+            const globalId = attrs.GlobalID2 || null;
             const dob = attrs.DOB ? new Date(attrs.DOB).getFullYear() : null;
             const dod = attrs.DOD ? new Date(attrs.DOD).getFullYear() : null;
             const dates = (dob || dod) ? ` <span style="color:#888; font-size:11px;">${dob || "?"}–${dod || "?"}</span>` : "";
@@ -786,7 +721,7 @@
             div.innerHTML = `<strong style="font-size:12px;">${name}</strong>${dates}`;
             div.addEventListener("mouseover", () => div.style.background = "#f5f5f5");
             div.addEventListener("mouseout", () => div.style.background = "");
-            div.addEventListener("click", () => applyFilter(name));
+            div.addEventListener("click", () => applyFilter(name, globalId));
             resultsDiv.appendChild(div);
           });
         } catch (err) {
@@ -795,12 +730,7 @@
         }
       });
 
-      // The popup trigger-action handler responds to the Edit and Delete buttons
-      // I added to each feature's popup. In SDK 5.1 the event syntax changed from
-      // view.popup.on() to the reactiveUtils on() function — I learned this the
-      // hard way after debugging a "is not a function" error. The delete handler
-      // uses applyEdits with the feature's OBJECTID rather than passing the whole
-      // feature object, which is more reliable in this SDK version.
+      // Popup delete handler — uses applyEdits with OBJECTID for reliability.
       on(() => view.popup, "trigger-action", async (event) => {
         const feature = view.popup.selectedFeature;
         if (!feature) return;
@@ -811,7 +741,6 @@
             targetLayer = l; break;
           }
         }
-        if (event.action.id === "edit-record") { editorExpand.expanded = true; view.popup.close(); }
         if (event.action.id === "delete-record") {
           const name = feature.attributes.person_id || "this feature";
           if (!confirm(`Delete record for "${name}"? This cannot be undone.`)) return;
@@ -825,56 +754,43 @@
 
       // ════════════════════════════════════════════
       // CUSTOM ADD SITE WORKFLOW
-      // I built this custom three-step panel because the built-in Editor widget
-      // cannot simultaneously write to two different tables in one action.
-      // My goal was that when a user captures a site (grave, birthplace, or house),
-      // the app also creates or links a corresponding Persons record in the same
-      // submission — so the spatial and biographical data stay in sync from the
-      // moment of capture rather than needing to be linked manually afterward.
-      //
-      // Step 1: User selects site type (Grave / Birthplace / House)
-      // Step 2: User clicks the map to place the GPS point
-      // Step 3: User fills in site details and either creates a new Person record
-      //         or searches for and links an existing one
-      //
-      // On submit, the code writes both records simultaneously using applyEdits
-      // and links them via the person_globalid foreign key field.
+      // Simultaneously writes a site feature and a Persons table record,
+      // linking them via person_globalid (stores Persons.GlobalID2).
+      // This ensures name changes never break the site-to-person link.
       // ════════════════════════════════════════════
-      let currentSiteType = null;   // "grave" | "birthplace" | "house"
-      let placedPoint = null;        // esri Point geometry
-      let mapClickHandler = null;    // handle to remove click listener
-      let selectedExistingPerson = null; // { globalId, name }
+      let currentSiteType = null;
+      let placedPoint = null;
+      let mapClickHandler = null;
+      let selectedExistingPerson = null;
       let isNewPerson = true;
 
       const panel = document.getElementById("addSitePanel");
       const clickBanner = document.getElementById("clickBanner");
 
-      // ── Site field definitions per type ──
       const siteFieldDefs = {
         grave: [
           { id: "sCemeteryName", label: "Cemetery Name", field: "CemeteryName" },
-          { id: "sAddress",      label: "Address",       field: "Address" },
-          { id: "sCity",         label: "City",          field: "City" },
-          { id: "sCounty",       label: "County",        field: "County" },
-          { id: "sState",        label: "State",         field: "State" },
-          { id: "sDescription",  label: "Notes",         field: "Description" }
+          { id: "sAddress", label: "Address", field: "Address" },
+          { id: "sCity", label: "City", field: "City" },
+          { id: "sCounty", label: "County", field: "County" },
+          { id: "sState", label: "State", field: "State" },
+          { id: "sDescription", label: "Notes", field: "Description" }
         ],
         birthplace: [
-          { id: "sCity",        label: "City",   field: "City" },
-          { id: "sCounty",      label: "County", field: "County" },
-          { id: "sState",       label: "State",  field: "State" },
-          { id: "sDescription", label: "Notes",  field: "Description" }
+          { id: "sCity", label: "City", field: "City" },
+          { id: "sCounty", label: "County", field: "County" },
+          { id: "sState", label: "State", field: "State" },
+          { id: "sDescription", label: "Notes", field: "Description" }
         ],
         house: [
-          { id: "sAddress",     label: "Address", field: "Address" },
-          { id: "sCity",        label: "City",    field: "City" },
-          { id: "sCounty",      label: "County",  field: "County" },
-          { id: "sState",       label: "State",   field: "State" },
-          { id: "sDescription", label: "Notes",   field: "Description" }
+          { id: "sAddress", label: "Address", field: "Address" },
+          { id: "sCity", label: "City", field: "City" },
+          { id: "sCounty", label: "County", field: "County" },
+          { id: "sState", label: "State", field: "State" },
+          { id: "sDescription", label: "Notes", field: "Description" }
         ]
       };
 
-      // ── Step helpers ──
       function showStep(n) {
         [1,2,3].forEach(i => {
           document.getElementById(`step${i}`).style.display = i === n ? "block" : "none";
@@ -890,10 +806,8 @@
       }
 
       function resetPanel() {
-        currentSiteType = null;
-        placedPoint = null;
-        selectedExistingPerson = null;
-        isNewPerson = true;
+        currentSiteType = null; placedPoint = null;
+        selectedExistingPerson = null; isNewPerson = true;
         if (mapClickHandler) { mapClickHandler.remove(); mapClickHandler = null; }
         clickBanner.classList.remove("visible");
         document.querySelectorAll(".site-type-btn").forEach(b => b.classList.remove("active"));
@@ -919,17 +833,9 @@
         showStep(1);
       }
 
-      // ── Open / close panel ──
-      document.getElementById("addSiteTrigger").addEventListener("click", () => {
-        resetPanel();
-        panel.classList.add("visible");
-      });
-      document.getElementById("closePanel").addEventListener("click", () => {
-        panel.classList.remove("visible");
-        resetPanel();
-      });
+      document.getElementById("addSiteTrigger").addEventListener("click", () => { resetPanel(); panel.classList.add("visible"); });
+      document.getElementById("closePanel").addEventListener("click", () => { panel.classList.remove("visible"); resetPanel(); });
 
-      // ── Step 1: Select site type ──
       document.querySelectorAll(".site-type-btn").forEach(btn => {
         btn.addEventListener("click", () => {
           document.querySelectorAll(".site-type-btn").forEach(b => b.classList.remove("active"));
@@ -944,17 +850,12 @@
       document.getElementById("proceedToPlace").addEventListener("click", () => {
         showStep(2);
         clickBanner.classList.add("visible");
-        // Listen for map click to place point
         mapClickHandler = view.on("click", (e) => {
           e.stopPropagation();
           placedPoint = e.mapPoint;
-          const lat = placedPoint.latitude.toFixed(5);
-          const lon = placedPoint.longitude.toFixed(5);
-          document.getElementById("coordDisplay").textContent = `📍 ${lat}, ${lon}`;
+          document.getElementById("coordDisplay").textContent = `📍 ${placedPoint.latitude.toFixed(5)}, ${placedPoint.longitude.toFixed(5)}`;
           clickBanner.classList.remove("visible");
-          mapClickHandler.remove();
-          mapClickHandler = null;
-          // Build site-specific fields and advance to step 3
+          mapClickHandler.remove(); mapClickHandler = null;
           buildSiteFields();
           showStep(3);
         });
@@ -965,6 +866,7 @@
         clickBanner.classList.remove("visible");
         showStep(1);
       });
+
       document.getElementById("backToStep2").addEventListener("click", () => {
         placedPoint = null;
         clickBanner.classList.add("visible");
@@ -972,33 +874,26 @@
         mapClickHandler = view.on("click", (e) => {
           e.stopPropagation();
           placedPoint = e.mapPoint;
-          const lat = placedPoint.latitude.toFixed(5);
-          const lon = placedPoint.longitude.toFixed(5);
-          document.getElementById("coordDisplay").textContent = `📍 ${lat}, ${lon}`;
+          document.getElementById("coordDisplay").textContent = `📍 ${placedPoint.latitude.toFixed(5)}, ${placedPoint.longitude.toFixed(5)}`;
           clickBanner.classList.remove("visible");
           mapClickHandler.remove(); mapClickHandler = null;
           showStep(3);
         });
       });
 
-      // ── Build site fields dynamically ──
       function buildSiteFields() {
         const container = document.getElementById("siteFields");
         container.innerHTML = "";
-        const defs = siteFieldDefs[currentSiteType] || [];
-        defs.forEach(def => {
+        (siteFieldDefs[currentSiteType] || []).forEach(def => {
           const input = document.createElement("input");
-          input.type = "text";
-          input.id = def.id;
-          input.className = "rr-input";
-          input.placeholder = def.label;
+          input.type = "text"; input.id = def.id;
+          input.className = "rr-input"; input.placeholder = def.label;
           container.appendChild(input);
         });
         const labels = { grave: "Grave Details", birthplace: "Birthplace Details", house: "House / Site Details" };
         document.getElementById("siteFieldsLabel").textContent = labels[currentSiteType];
       }
 
-      // ── Person toggle (new vs existing) ──
       document.getElementById("btnNewPerson").addEventListener("click", () => {
         isNewPerson = true;
         document.getElementById("btnNewPerson").classList.add("active");
@@ -1014,7 +909,7 @@
         document.getElementById("existingPersonFields").style.display = "block";
       });
 
-      // ── Search existing persons ──
+      // Search existing persons — uses GlobalID2 as the linking key.
       document.getElementById("searchExistingBtn").addEventListener("click", async () => {
         const query = document.getElementById("existingPersonSearch").value.trim();
         if (!query) return;
@@ -1043,7 +938,8 @@
             div.addEventListener("click", () => {
               document.querySelectorAll(".person-result").forEach(r => r.classList.remove("selected"));
               div.classList.add("selected");
-              selectedExistingPerson = { globalId: attrs.GlobalID, name: attrs.Name };
+              // Phase 1: use GlobalID2 as the linking key, not GlobalID
+              selectedExistingPerson = { globalId: attrs.GlobalID2, name: attrs.Name };
               const display = document.getElementById("selectedPersonDisplay");
               display.textContent = `✓ Selected: ${attrs.Name}`;
               display.style.display = "block";
@@ -1056,27 +952,25 @@
         }
       });
 
-      // ── Submit record ──
+      // Submit record — writes site feature and Persons record simultaneously.
+      // Phase 1: person_globalid on the site stores Persons.GlobalID2 so that
+      // name changes never break the link between a grave and its person record.
       document.getElementById("submitRecord").addEventListener("click", async () => {
         if (!placedPoint) { setStatus("No location set — go back and place a point.", "error"); return; }
-
         const submitBtn = document.getElementById("submitRecord");
         submitBtn.disabled = true;
         submitBtn.textContent = "Saving...";
-
         try {
           let personGlobalId = null;
           let personName = "";
 
           if (isNewPerson) {
-            // Validate name
             personName = document.getElementById("pName").value.trim();
             if (!personName) {
               setStatus("Person name is required.", "error");
               submitBtn.disabled = false; submitBtn.textContent = "Save Record";
               return;
             }
-            // Write Persons record
             const personAttrs = {
               Name: personName,
               Father: document.getElementById("pFather").value.trim() || null,
@@ -1087,24 +981,18 @@
             if (dobVal) personAttrs.DOB = new Date(dobVal).toISOString();
             if (dodVal) personAttrs.DOD = new Date(dodVal).toISOString();
 
-            const personResult = await personsTable.applyEdits({
-              addFeatures: [{ attributes: personAttrs }]
-            });
-            console.log("Person applyEdits result:", JSON.stringify(personResult));
-            if (personResult.addFeatureResults[0].error) {
-              console.error("Person save error:", personResult.addFeatureResults[0].error);
-              throw personResult.addFeatureResults[0].error;
-            }
-            // Get the GlobalID of the newly created person
+            const personResult = await personsTable.applyEdits({ addFeatures: [{ attributes: personAttrs }] });
+            if (personResult.addFeatureResults[0].error) throw personResult.addFeatureResults[0].error;
+
+            // Query back the new record to get its GlobalID2
             const newOid = personResult.addFeatureResults[0].objectId;
             const personQuery = await personsTable.queryFeatures({
-              where: `OBJECTID = ${newOid}`, outFields: ["GlobalID", "Name"], returnGeometry: false
+              where: `OBJECTID = ${newOid}`, outFields: ["GlobalID2", "Name"], returnGeometry: false
             });
             if (personQuery.features.length > 0) {
-              personGlobalId = personQuery.features[0].attributes.GlobalID;
+              personGlobalId = personQuery.features[0].attributes.GlobalID2;
             }
           } else {
-            // Use existing person
             if (!selectedExistingPerson) {
               setStatus("Please search and select an existing person.", "error");
               submitBtn.disabled = false; submitBtn.textContent = "Save Record";
@@ -1114,18 +1002,12 @@
             personName = selectedExistingPerson.name;
           }
 
-          // ── Build site attributes ──
-          const siteAttrs = {
-            person_id: personName,
-            person_globalid: personGlobalId
-          };
-          const defs = siteFieldDefs[currentSiteType] || [];
-          defs.forEach(def => {
+          // Build site attributes — person_globalid stores GlobalID2 from Persons
+          const siteAttrs = { person_id: personName, person_globalid: personGlobalId };
+          (siteFieldDefs[currentSiteType] || []).forEach(def => {
             const el = document.getElementById(def.id);
             if (el && el.value.trim()) siteAttrs[def.field] = el.value.trim();
           });
-
-          // Add DOB to site record if grave or birthplace (from person fields)
           if ((currentSiteType === "grave" || currentSiteType === "birthplace") && isNewPerson) {
             const dobVal = document.getElementById("pDOB").value.trim();
             const dodVal = document.getElementById("pDOD").value.trim();
@@ -1133,142 +1015,94 @@
             if (currentSiteType === "grave" && dodVal) siteAttrs.DOD = new Date(dodVal).toISOString();
           }
 
-          // ── Write site feature ──
           const layerMap = { grave: gravesLayer, birthplace: birthplaceLayer, house: houseLayer };
-          const targetLayer = layerMap[currentSiteType];
-          const siteGraphic = new Graphic({
-            geometry: placedPoint,
-            attributes: siteAttrs
+          const siteResult = await layerMap[currentSiteType].applyEdits({
+            addFeatures: [new Graphic({ geometry: placedPoint, attributes: siteAttrs })]
           });
-          const siteResult = await targetLayer.applyEdits({ addFeatures: [siteGraphic] });
-          console.log("Site applyEdits result:", JSON.stringify(siteResult));
-          if (siteResult.addFeatureResults[0].error) {
-            console.error("Site save error:", siteResult.addFeatureResults[0].error);
-            throw siteResult.addFeatureResults[0].error;
-          }
+          if (siteResult.addFeatureResults[0].error) throw siteResult.addFeatureResults[0].error;
 
           setStatus(`✓ Record saved for ${personName}`, "success");
           submitBtn.textContent = "Saved!";
-          setTimeout(() => {
-            panel.classList.remove("visible");
-            resetPanel();
-          }, 1800);
+          setTimeout(() => { panel.classList.remove("visible"); resetPanel(); }, 1800);
 
         } catch (err) {
           console.error("Save failed:", err);
-          console.error("Error details:", JSON.stringify(err));
-          setStatus(`Save failed: ${err.message || err.details || JSON.stringify(err)}`, "error");
+          setStatus(`Save failed: ${err.message || JSON.stringify(err)}`, "error");
           submitBtn.disabled = false;
           submitBtn.textContent = "Save Record";
         }
       });
 
-      // I use two separate GraphicsLayers for the family web feature:
-      // lineageLayer holds the line graphics connecting graves,
-      // and labelsLayer holds the text label for each person's name.
-      // Keeping them separate means I can clear lines and labels independently
-      // if needed. Both are hidden from the layer list (listMode: "hide")
-      // since they're generated dynamically rather than being persistent data layers.
+      // Two GraphicsLayers for the family web — lineageLayer for lines,
+      // labelsLayer for name labels. Both hidden from the layer list.
       const lineageLayer = new GraphicsLayer({ title: "Family Web", listMode: "hide" });
       const labelsLayer = new GraphicsLayer({ title: "Family Labels", listMode: "hide" });
       map.add(lineageLayer);
       map.add(labelsLayer);
-      view.ui.add(document.getElementById("lineageToggleWrap"), "top-left");
       let lineageVisible = false;
 
-      // Ancestor lines are red tones (getting lighter with each generation back)
-      // and descendant lines are blue tones (getting lighter with each generation forward).
-      // This color split gives an immediate visual sense of direction —
-      // red lines lead into the past, blue lines lead toward the present.
-      // Line width also decreases slightly with each generation to reinforce distance.
+      // Generation colors — red tones for ancestors, blue for descendants.
       const ancestorColors = [
-        [100, 0, 0, 230],
-        [160, 40, 40, 200],
-        [200, 100, 100, 170],
-        [230, 170, 170, 140]
+        [100, 0, 0, 230], [160, 40, 40, 200], [200, 100, 100, 170], [230, 170, 170, 140]
       ];
       const descendantColors = [
-        [0, 0, 120, 230],
-        [40, 40, 180, 200],
-        [100, 100, 210, 170],
-        [170, 170, 230, 140]
+        [0, 0, 120, 230], [40, 40, 180, 200], [100, 100, 210, 170], [170, 170, 230, 140]
       ];
 
-      // ── Add a name label graphic at a point ──
-      // I check how many existing labels are near the same point and
-      // offset each one vertically so they don't stack on top of each other.
-      // The color parameter matches the generation line color so labels
-      // visually correspond to their lineage connection.
+      // Labels are colored to match their generation line and stacked vertically
+      // when multiple people share the same grave location.
       function addLabel(name, point, labeledNames, color) {
         const displayName = name.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
         if (labeledNames.has(displayName)) return;
         labeledNames.add(displayName);
-
-        // Count how many labels are already near this point (within ~0.01 degrees)
         let nearbyCount = 0;
         labelsLayer.graphics.forEach(g => {
           if (g.geometry &&
               Math.abs(g.geometry.longitude - point.longitude) < 0.01 &&
-              Math.abs(g.geometry.latitude - point.latitude) < 0.01) {
-            nearbyCount++;
-          }
+              Math.abs(g.geometry.latitude - point.latitude) < 0.01) nearbyCount++;
         });
-
-        // Use provided color or fall back to default navy
-        const labelColor = color || [26, 26, 46, 255];
-
         labelsLayer.add(new Graphic({
           geometry: point,
           symbol: {
             type: "text",
-            color: labelColor,
-            haloColor: [255, 255, 255, 240],
-            haloSize: "2px",
+            color: color || [26, 26, 46, 255],
+            haloColor: [255, 255, 255, 240], haloSize: "2px",
             text: displayName,
             font: { size: 10, family: "Georgia", weight: "bold" },
-            horizontalAlignment: "center",
-            xoffset: 0,
+            horizontalAlignment: "center", xoffset: 0,
             yoffset: 14 + (nearbyCount * 14)
           }
         }));
       }
 
-      // traceFromPerson is the core function of the family web feature.
-      // It works in two directions simultaneously from a selected individual:
-      //
-      // ANCESTORS (upward): follows Father and Mother fields on each Persons record,
-      // matching those text names against person_id on the Graves layer to find
-      // the parent's burial location, then recurses upward up to 4 generations.
-      //
-      // DESCENDANTS (downward): builds a childrenByParent lookup from the Persons table
-      // (checking who has this person listed as their Father or Mother), then follows
-      // those links downward up to 4 generations.
-      //
-      // Name matching is case-insensitive but requires consistent spelling —
-      // "John Smith" in a Father field must exactly match "John Smith" in person_id.
-      // This is a known limitation of using text fields rather than foreign key IDs,
-      // but works well for a personal family dataset where I control data entry.
-      async function traceFromPerson(startName) {
+      // traceFromPerson — Phase 1 upgrade.
+      // Now uses person_globalid (= Persons.GlobalID2) to look up grave geometry
+      // for the selected person, making the start point immune to name changes.
+      // Ancestor/descendant traversal still uses Father/Mother text fields (Phase 2).
+      async function traceFromPerson(startName, startGlobalId) {
         lineageLayer.removeAll();
         labelsLayer.removeAll();
 
-        // Query all graves
+        // Query all graves — build two lookups:
+        // gravesByName: for ancestor/descendant name matching (Phase 2 will replace this)
+        // gravesByGlobalId: Phase 1 — find the selected person's grave via GlobalID2
         const gravesResult = await gravesLayer.queryFeatures({
-          where: "1=1", outFields: ["person_id"], returnGeometry: true
+          where: "1=1", outFields: ["person_id", "person_globalid"], returnGeometry: true
         });
         const gravesByName = {};
+        const gravesByGlobalId = {};
         gravesResult.features.forEach(f => {
           const name = (f.attributes.person_id || "").trim().toLowerCase();
+          const gid = (f.attributes.person_globalid || "").trim();
           if (name) gravesByName[name] = f.geometry;
+          if (gid) gravesByGlobalId[gid] = f.geometry;
         });
-        console.log("Graves by name keys:", Object.keys(gravesByName));
 
-        // Query all persons
+        // Query all persons for ancestor/descendant traversal
         const personsResult = await personsTable.queryFeatures({
-          where: "1=1", outFields: ["Name", "Father", "Mother"], returnGeometry: false
+          where: "1=1", outFields: ["Name", "Father", "Mother", "GlobalID2"], returnGeometry: false
         });
         const personsByName = {};
-        // Also build a children lookup: parentName → [childNames]
         const childrenByParent = {};
         personsResult.features.forEach(f => {
           const name = (f.attributes.Name || "").trim().toLowerCase();
@@ -1276,19 +1110,10 @@
           const mother = (f.attributes.Mother || "").trim().toLowerCase();
           if (name) {
             personsByName[name] = { father, mother };
-            if (father) {
-              if (!childrenByParent[father]) childrenByParent[father] = [];
-              childrenByParent[father].push(name);
-            }
-            if (mother) {
-              if (!childrenByParent[mother]) childrenByParent[mother] = [];
-              childrenByParent[mother].push(name);
-            }
+            if (father) { if (!childrenByParent[father]) childrenByParent[father] = []; childrenByParent[father].push(name); }
+            if (mother) { if (!childrenByParent[mother]) childrenByParent[mother] = []; childrenByParent[mother].push(name); }
           }
         });
-        console.log("Persons by name keys:", Object.keys(personsByName));
-        console.log("Starting trace from:", startName.trim().toLowerCase());
-        console.log("Person record found:", personsByName[startName.trim().toLowerCase()]);
 
         const involvedPoints = [];
         let lineCount = 0;
@@ -1297,10 +1122,14 @@
         const labeledNames = new Set();
         const startKey = startName.trim().toLowerCase();
 
-        // Label the starting person in navy
-        if (gravesByName[startKey]) addLabel(startKey, gravesByName[startKey], labeledNames, [26, 26, 46, 255]);
+        // Phase 1: find starting grave via GlobalID2 link if available,
+        // fall back to name matching if not.
+        const startPoint = (startGlobalId && gravesByGlobalId[startGlobalId])
+          ? gravesByGlobalId[startGlobalId]
+          : gravesByName[startKey];
 
-        // ── Trace ancestors (upward — red lines) ──
+        if (startPoint) addLabel(startKey, startPoint, labeledNames, [26, 26, 46, 255]);
+
         function traceAncestors(name, generation) {
           if (generation > 4 || visitedAncestors.has(name) || !name) return;
           visitedAncestors.add(name);
@@ -1309,7 +1138,6 @@
           if (!person) return;
           const color = ancestorColors[generation - 1] || ancestorColors[3];
           const lineSymbol = { type: "simple-line", color, width: Math.max(1, 3 - generation * 0.5), style: "solid" };
-
           if (person.father && gravesByName[person.father] && childPoint) {
             const parentPoint = gravesByName[person.father];
             lineageLayer.add(new Graphic({
@@ -1338,7 +1166,6 @@
           }
         }
 
-        // ── Trace descendants (downward — blue lines) ──
         function traceDescendants(name, generation) {
           if (generation > 4 || visitedDescendants.has(name) || !name) return;
           visitedDescendants.add(name);
@@ -1347,7 +1174,6 @@
           const children = childrenByParent[name] || [];
           const color = descendantColors[generation - 1] || descendantColors[3];
           const lineSymbol = { type: "simple-line", color, width: Math.max(1, 3 - generation * 0.5), style: "solid" };
-
           children.forEach(childName => {
             const childPoint = gravesByName[childName];
             if (!childPoint) return;
@@ -1364,8 +1190,13 @@
           });
         }
 
+        // Use GlobalID2-linked start point for initial label,
+        // then use name for ancestor/descendant traversal
         traceAncestors(startKey, 1);
         traceDescendants(startKey, 1);
+
+        // Also include the start point in extent calculation
+        if (startPoint) involvedPoints.push(startPoint);
 
         let extent = null;
         if (involvedPoints.length > 0) {
@@ -1378,48 +1209,35 @@
           });
           extent = { type: "extent", xmin, ymin, xmax, ymax, spatialReference: { wkid: 4326 } };
         }
-        return { count: lineCount, extent };
+        return { count: lineCount, extent, startPoint };
       }
 
-      // ── Trace button handler ──
+      // Trace button — passes both name and GlobalID2 to traceFromPerson.
       document.getElementById("traceWebBtn").addEventListener("click", async () => {
         if (!currentFilterName) return;
         const btn = document.getElementById("traceWebBtn");
         btn.disabled = true;
         btn.textContent = "⬡ Tracing...";
         try {
-          const { count, extent } = await traceFromPerson(currentFilterName);
+          const { count, extent, startPoint } = await traceFromPerson(currentFilterName, currentFilterGlobalId);
           lineageLayer.visible = true;
           lineageVisible = true;
           btn.textContent = count > 0 ? `⬡ ${count} links traced` : "⬡ No links found";
           document.getElementById("webLegend").style.display = count > 0 ? "block" : "none";
 
           if (extent && count > 0) {
-            // Build a proper extent object and zoom to it with a buffer
-            const buffer = 0.05; // ~3 miles buffer around the extent
+            const buffer = 0.05;
             await view.goTo({
               target: {
                 type: "extent",
-                xmin: extent.xmin - buffer,
-                ymin: extent.ymin - buffer,
-                xmax: extent.xmax + buffer,
-                ymax: extent.ymax + buffer,
+                xmin: extent.xmin - buffer, ymin: extent.ymin - buffer,
+                xmax: extent.xmax + buffer, ymax: extent.ymax + buffer,
                 spatialReference: { wkid: 4326 }
               }
             }, { duration: 1200, easing: "ease-in-out" });
-          } else {
-            // No links — zoom to just the selected person's grave
-            const gravesResult = await gravesLayer.queryFeatures({
-              where: `person_id LIKE '%${currentFilterName}%'`,
-              outFields: ["person_id"],
-              returnGeometry: true
-            });
-            if (gravesResult.features.length > 0) {
-              await view.goTo({
-                target: gravesResult.features[0].geometry,
-                zoom: 14
-              }, { duration: 1200, easing: "ease-in-out" });
-            }
+          } else if (startPoint) {
+            // No links but zoom to the person's grave
+            await view.goTo({ target: startPoint, zoom: 14 }, { duration: 1200, easing: "ease-in-out" });
           }
         } catch (err) {
           console.error("Trace failed:", err);
@@ -1428,58 +1246,35 @@
         btn.disabled = false;
       });
 
-      // buildLineageWeb draws lines for ALL parent-child grave relationships
-      // in the dataset simultaneously, without filtering to a specific person.
-      // This is useful for getting a high-level overview of how the whole
-      // family is geographically distributed — showing migration patterns
-      // across generations at a glance. It uses the same red line style as
-      // the ancestor trace but doesn't color by generation since there is
-      // no single starting point to measure distance from.
+      // Show All Family Web — draws lines for all parent-child relationships
+      // across the entire dataset using name matching.
       async function buildLineageWeb() {
         lineageLayer.removeAll();
-
         const gravesResult = await gravesLayer.queryFeatures({
-          where: "1=1",
-          outFields: ["person_id", "OBJECTID"],
-          returnGeometry: true
+          where: "1=1", outFields: ["person_id", "OBJECTID"], returnGeometry: true
         });
-
         if (gravesResult.features.length === 0) return { count: 0, extent: null };
-
         const gravesByName = {};
         gravesResult.features.forEach(f => {
           const name = (f.attributes.person_id || "").trim().toLowerCase();
           if (name) gravesByName[name] = f.geometry;
         });
-
         const personsResult = await personsTable.queryFeatures({
-          where: "1=1",
-          outFields: ["Name", "Father", "Mother"],
-          returnGeometry: false
+          where: "1=1", outFields: ["Name", "Father", "Mother"], returnGeometry: false
         });
-
-        const lineSymbol = {
-          type: "simple-line", color: [139, 26, 26, 180],
-          width: 1.5, style: "solid"
-        };
-
+        const lineSymbol = { type: "simple-line", color: [139, 26, 26, 180], width: 1.5, style: "solid" };
         let lineCount = 0;
         const involvedPoints = [];
-
         personsResult.features.forEach(f => {
           const attrs = f.attributes;
           const childName = (attrs.Name || "").trim().toLowerCase();
           const fatherName = (attrs.Father || "").trim().toLowerCase();
           const motherName = (attrs.Mother || "").trim().toLowerCase();
           const childPoint = gravesByName[childName];
-
           if (childPoint && fatherName && gravesByName[fatherName]) {
             const fatherPoint = gravesByName[fatherName];
             lineageLayer.add(new Graphic({
-              geometry: { type: "polyline", paths: [[
-                [childPoint.longitude, childPoint.latitude],
-                [fatherPoint.longitude, fatherPoint.latitude]
-              ]]},
+              geometry: { type: "polyline", paths: [[[childPoint.longitude, childPoint.latitude],[fatherPoint.longitude, fatherPoint.latitude]]]},
               symbol: lineSymbol,
               attributes: { relationship: `${attrs.Name} → ${attrs.Father}` },
               popupTemplate: { title: "Family Connection", content: `{relationship}` }
@@ -1487,14 +1282,10 @@
             involvedPoints.push(childPoint, fatherPoint);
             lineCount++;
           }
-
           if (childPoint && motherName && gravesByName[motherName]) {
             const motherPoint = gravesByName[motherName];
             lineageLayer.add(new Graphic({
-              geometry: { type: "polyline", paths: [[
-                [childPoint.longitude, childPoint.latitude],
-                [motherPoint.longitude, motherPoint.latitude]
-              ]]},
+              geometry: { type: "polyline", paths: [[[childPoint.longitude, childPoint.latitude],[motherPoint.longitude, motherPoint.latitude]]]},
               symbol: { ...lineSymbol, color: [26, 26, 139, 180] },
               attributes: { relationship: `${attrs.Name} → ${attrs.Mother}` },
               popupTemplate: { title: "Family Connection", content: `{relationship}` }
@@ -1503,8 +1294,6 @@
             lineCount++;
           }
         });
-
-        // Build extent from all involved grave points
         let extent = null;
         if (involvedPoints.length > 0) {
           let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
@@ -1516,7 +1305,6 @@
           });
           extent = { type: "extent", xmin, ymin, xmax, ymax, spatialReference: { wkid: 4326 } };
         }
-
         return { count: lineCount, extent };
       }
 
@@ -1536,20 +1324,14 @@
             lineageLayer.visible = true;
             lineageVisible = true;
             btn.classList.add("active");
-            btn.textContent = count > 0
-              ? `⬡ Hide All Family Web (${count} links)`
-              : "⬡ Hide All Family Web (no links yet)";
-
-            // Zoom to extent of all involved graves with padding
+            btn.textContent = count > 0 ? `⬡ Hide All Family Web (${count} links)` : "⬡ Hide All Family Web (no links yet)";
             if (extent && count > 0) {
               const buffer = 0.05;
               await view.goTo({
                 target: {
                   type: "extent",
-                  xmin: extent.xmin - buffer,
-                  ymin: extent.ymin - buffer,
-                  xmax: extent.xmax + buffer,
-                  ymax: extent.ymax + buffer,
+                  xmin: extent.xmin - buffer, ymin: extent.ymin - buffer,
+                  xmax: extent.xmax + buffer, ymax: extent.ymax + buffer,
                   spatialReference: { wkid: 4326 }
                 }
               }, { duration: 1200, easing: "ease-in-out" });
@@ -1562,13 +1344,12 @@
         }
       });
 
-      // ── Error logging ──
+      // Error logging
       gravesLayer.when(() => console.log("Graves loaded")).catch(e => console.error("Graves failed:", e));
       birthplaceLayer.when(() => console.log("Birthplaces loaded")).catch(e => console.error("Birthplaces failed:", e));
       houseLayer.when(() => console.log("Houses loaded")).catch(e => console.error("Houses failed:", e));
 
-      // Scale the Esri UI down on large monitors using the zoom property
-      // which reaches inside Shadow DOM components unlike CSS transform.
+      // Scale UI down on large monitors using zoom property which reaches Shadow DOM.
       view.when(() => {
         if (window.innerWidth >= 2560) {
           document.querySelector(".esri-ui").style.zoom = "0.7";
