@@ -816,17 +816,6 @@
       async function searchPersonByName(input) {
         console.log("searchPersonByName called with:", input);
         const safe = input.replace(/'/g, "''");
-        await personsTable.when();
-
-        // Diagnostic test
-        try {
-          const test = await personsTable.queryFeatures({
-            where: "1=1", outFields: ["Name"], returnGeometry: false, num: 1
-          });
-          console.log("Basic query OK:", test.features[0]?.attributes?.Name);
-        } catch (testErr) {
-          console.error("Basic query FAILED:", testErr?.message, JSON.stringify(testErr));
-        }
 
         // LIKE match
         console.log("Searching LIKE for:", safe);
@@ -857,9 +846,18 @@
             const name = f.attributes.Name || "";
             const nameCode = soundex(name);
             const firstCode = soundex(name.split(" ")[0]);
-            console.log(`Comparing ${name}: ${nameCode} vs ${inputCode}, first: ${firstCode}`);
             return nameCode === inputCode || firstCode === inputCode;
           });
+          if (match) {
+            console.log("Soundex match:", match.attributes.Name);
+            return { feature: match, matched: "soundex" };
+          }
+        } catch (soundexErr) {
+          console.warn("Soundex failed:", soundexErr?.message);
+        }
+
+        return null;
+      }
           if (match) {
             console.log("Soundex match:", match.attributes.Name);
             return { feature: match, matched: "soundex" };
@@ -2104,6 +2102,7 @@
     </script>
   </body>
 </html>
+
 
 
 
