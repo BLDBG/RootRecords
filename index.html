@@ -739,6 +739,29 @@
                 horizontalAlignment: "center", xoffset: 0, yoffset: 14
               }
             }));
+
+            // Auto-open popup for the single matched feature
+            // Query back with full outFields so popup has all attributes
+            const layers = [gravesLayer, birthplaceLayer, houseLayer];
+            for (const l of layers) {
+              if (!l.visible) continue;
+              try {
+                const fullResult = await l.queryFeatures({
+                  where, outFields: ["*"], returnGeometry: true
+                });
+                if (fullResult.features.length > 0) {
+                  const f = fullResult.features[0];
+                  view.popup.open({
+                    features: [f],
+                    location: f.geometry
+                  });
+                  // Move search panel to left so it doesn't overlap popup
+                  searchPanel.style.right = "auto";
+                  searchPanel.style.left = "10px";
+                  break;
+                }
+              } catch (e) { /* layer may have no results */ }
+            }
           } else if (allFeatures.length > 1) {
             await view.goTo(allFeatures, { duration: 1000, easing: "ease-in-out" });
             labelsLayer.removeAll();
@@ -813,6 +836,12 @@
         labelsLayer.removeAll();
         document.getElementById("lineageToggle").textContent = "⬡ Show All Family Web";
         document.getElementById("lineageToggle").classList.remove("active");
+        // Reset search panel back to right side
+        searchPanel.style.left = "auto";
+        const filterBtn = document.getElementById("filterTrigger");
+        const rect = filterBtn.getBoundingClientRect();
+        searchPanel.style.right = (window.innerWidth - rect.right) + "px";
+        view.popup.close();
       });
 
       // Browse all persons — shows alphabetical list with DOB/DOD when available.
