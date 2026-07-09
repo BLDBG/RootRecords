@@ -241,19 +241,32 @@
       </div>
       <div id="browseResults" style="display:none; max-height:180px; overflow-y:auto; border:1px solid #ddd; border-radius:3px; margin-top:6px; font-size:12px;"></div>
       <button id="traceWebBtn" class="rr-btn" style="display:none; background:#6b1a1a; margin-top:6px;">⬡ Trace Family Web</button>
+
+      <!-- Trace options — expandable -->
+      <div id="traceOptions" style="display:none; margin-top:6px;">
+        <div id="traceOptionsToggle" style="
+          font-size:11px; color:#888; cursor:pointer; padding:4px 0;
+          text-transform:uppercase; letter-spacing:0.5px;
+          display:flex; align-items:center; gap:4px;
+        ">
+          <span id="traceOptionsArrow">▸</span> Trace Options
+        </div>
+        <div id="traceOptionsBody" style="display:none; padding:8px 0 4px;">
+          <div style="font-size:11px; color:#555; margin-bottom:6px; display:flex; align-items:center; justify-content:space-between;">
+            <span>Ancestors</span>
+            <div id="ancestorPills" style="display:flex; gap:4px;"></div>
+          </div>
+          <div style="font-size:11px; color:#555; display:flex; align-items:center; justify-content:space-between;">
+            <span>Descendants</span>
+            <div id="descendantPills" style="display:flex; gap:4px;"></div>
+          </div>
+        </div>
+      </div>
+
       <button id="clearBtn" class="rr-btn-secondary">Clear filter</button>
       <div id="webLegend" style="display:none; margin-top:10px; font-size:11px; color:#555;">
         <div style="margin-bottom:4px; font-weight:bold; letter-spacing:0.5px; text-transform:uppercase;">Generation Key</div>
-        <div style="margin-bottom:3px; font-size:10px; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Ancestors (red)</div>
-        <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(100,0,0);"></span> Gen 1 — Parents</div>
-        <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(160,40,40);"></span> Gen 2 — Grandparents</div>
-        <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(200,100,100);"></span> Gen 3</div>
-        <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(230,170,170);"></span> Gen 4</div>
-        <div style="margin-bottom:3px; font-size:10px; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Descendants (blue)</div>
-        <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(0,0,120);"></span> Gen 1 — Children</div>
-        <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(40,40,180);"></span> Gen 2 — Grandchildren</div>
-        <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(100,100,210);"></span> Gen 3</div>
-        <div style="display:flex; align-items:center; gap:6px;"><span style="display:inline-block; width:28px; height:3px; background:rgb(170,170,230);"></span> Gen 4</div>
+        <div id="legendContent"></div>
       </div>
     </div>
 
@@ -699,6 +712,7 @@
         birthplaceLayer.definitionExpression = where;
         houseLayer.definitionExpression = where;
         document.getElementById("traceWebBtn").style.display = "block";
+        showTraceOptions();
         document.getElementById("browseResults").style.display = "none";
         lineageLayer.removeAll();
         lineageLayer.visible = false;
@@ -833,6 +847,9 @@
         birthplaceLayer.definitionExpression = "";
         houseLayer.definitionExpression = "";
         document.getElementById("traceWebBtn").style.display = "none";
+        document.getElementById("traceOptions").style.display = "none";
+        document.getElementById("traceOptionsBody").style.display = "none";
+        document.getElementById("traceOptionsArrow").textContent = "▸";
         document.getElementById("webLegend").style.display = "none";
         document.getElementById("browseResults").style.display = "none";
         lineageLayer.removeAll();
@@ -1550,8 +1567,116 @@
         }
       });
 
-      // Two GraphicsLayers for the family web — lineageLayer for lines,
-      // labelsLayer for name labels. Both hidden from the layer list.
+      // ── Generation options — pill selectors ──
+      let ancestorGens = 2;
+      let descendantGens = 2;
+
+      const genLabels = {
+        ancestor: ["Parents", "Grandparents", "Great-grandparents", "Great-great-grandparents"],
+        descendant: ["Children", "Grandchildren", "Great-grandchildren", "Great-great-grandchildren"]
+      };
+
+      // Enhanced colors — more dramatic differentiation across 4 generations
+      const ancestorColors = [
+        [120, 0, 0, 240],     // Gen 1 — deep dark red, thick solid
+        [180, 40, 40, 210],   // Gen 2 — medium red, solid
+        [210, 100, 100, 180], // Gen 3 — lighter red, thin solid
+        [235, 170, 170, 150]  // Gen 4 — pale pink, thin dashed
+      ];
+      const ancestorStyles = ["solid", "solid", "solid", "dash"];
+      const ancestorWidths = [2.5, 2, 1.5, 1];
+
+      const descendantColors = [
+        [0, 0, 140, 240],     // Gen 1 — deep navy, thick solid
+        [40, 40, 200, 210],   // Gen 2 — medium blue, solid
+        [100, 100, 220, 180], // Gen 3 — lighter blue, thin solid
+        [170, 170, 235, 150]  // Gen 4 — pale blue, thin dashed
+      ];
+      const descendantStyles = ["solid", "solid", "solid", "dash"];
+      const descendantWidths = [2.5, 2, 1.5, 1];
+
+      function buildPills(containerId, current, setter) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+        [1, 2, 3, 4].forEach(n => {
+          const pill = document.createElement("div");
+          pill.textContent = n;
+          pill.style.cssText = `
+            width:22px; height:22px; border-radius:50%; cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            font-size:11px; font-family:'Georgia',serif;
+            border:2px solid ${n <= current ? "#6b1a1a" : "#ddd"};
+            background:${n <= current ? "#f5e8e8" : "white"};
+            color:${n <= current ? "#6b1a1a" : "#aaa"};
+            font-weight:${n === current ? "bold" : "normal"};
+            transition: all 0.15s;
+          `;
+          pill.addEventListener("click", () => {
+            setter(n);
+            buildPills(containerId, n, setter);
+          });
+          container.appendChild(pill);
+        });
+      }
+
+      function buildLegend(numAncestors, numDescendants) {
+        const container = document.getElementById("legendContent");
+        container.innerHTML = "";
+
+        const addRow = (label, color, style, mb) => {
+          const row = document.createElement("div");
+          row.style.cssText = `display:flex; align-items:center; gap:6px; margin-bottom:${mb}px;`;
+          const swatch = document.createElement("span");
+          swatch.style.cssText = `
+            display:inline-block; width:28px; height:3px;
+            background:rgb(${color[0]},${color[1]},${color[2]});
+            ${style === "dash" ? "background: repeating-linear-gradient(90deg, rgb(" + color[0] + "," + color[1] + "," + color[2] + ") 0px, rgb(" + color[0] + "," + color[1] + "," + color[2] + ") 4px, transparent 4px, transparent 8px);" : ""}
+          `;
+          row.appendChild(swatch);
+          row.appendChild(document.createTextNode(label));
+          container.appendChild(row);
+        };
+
+        // Ancestor header
+        const ah = document.createElement("div");
+        ah.style.cssText = "margin-bottom:3px; font-size:10px; color:#888; text-transform:uppercase; letter-spacing:0.5px;";
+        ah.textContent = "Ancestors (red)";
+        container.appendChild(ah);
+
+        for (let i = 0; i < numAncestors; i++) {
+          addRow(`Gen ${i+1} — ${genLabels.ancestor[i]}`, ancestorColors[i], ancestorStyles[i], i === numAncestors - 1 ? 8 : 3);
+        }
+
+        // Descendant header
+        const dh = document.createElement("div");
+        dh.style.cssText = "margin-bottom:3px; font-size:10px; color:#888; text-transform:uppercase; letter-spacing:0.5px;";
+        dh.textContent = "Descendants (blue)";
+        container.appendChild(dh);
+
+        for (let i = 0; i < numDescendants; i++) {
+          addRow(`Gen ${i+1} — ${genLabels.descendant[i]}`, descendantColors[i], descendantStyles[i], i === numDescendants - 1 ? 0 : 3);
+        }
+      }
+
+      // Trace options toggle
+      document.getElementById("traceOptionsToggle").addEventListener("click", () => {
+        const body = document.getElementById("traceOptionsBody");
+        const arrow = document.getElementById("traceOptionsArrow");
+        const isOpen = body.style.display === "block";
+        body.style.display = isOpen ? "none" : "block";
+        arrow.textContent = isOpen ? "▸" : "▾";
+        if (!isOpen) {
+          buildPills("ancestorPills", ancestorGens, v => { ancestorGens = v; });
+          buildPills("descendantPills", descendantGens, v => { descendantGens = v; });
+        }
+      });
+
+      // Show trace options when trace button appears
+      function showTraceOptions() {
+        document.getElementById("traceOptions").style.display = "block";
+        buildPills("ancestorPills", ancestorGens, v => { ancestorGens = v; });
+        buildPills("descendantPills", descendantGens, v => { descendantGens = v; });
+      }
       const lineageLayer = new GraphicsLayer({ title: "Family Web", listMode: "hide" });
       const labelsLayer = new GraphicsLayer({ title: "Family Labels", listMode: "hide" });
       map.add(lineageLayer);
@@ -1664,21 +1789,23 @@
         }
 
         function traceAncestors(name, generation) {
-          // I limit ancestor tracing to 2 generations (parents and grandparents)
-          // to avoid visual clutter as the dataset grows with large families.
-          if (generation > 2 || visitedAncestors.has(name) || !name) return;
+          if (generation > ancestorGens || visitedAncestors.has(name) || !name) return;
           visitedAncestors.add(name);
           const childPoint = gravesByName[name];
           const person = personsByName[name];
           if (!person) return;
           const color = ancestorColors[generation - 1] || ancestorColors[3];
-          const lineSymbol = { type: "simple-line", color, width: Math.max(1, 3 - generation * 0.5), style: "solid" };
+          const lineSymbol = {
+            type: "simple-line", color,
+            width: ancestorWidths[generation - 1] || 1,
+            style: ancestorStyles[generation - 1] || "dash"
+          };
           if (person.father && gravesByName[person.father] && childPoint) {
             const parentPoint = gravesByName[person.father];
             lineageLayer.add(new Graphic({
               geometry: { type: "polyline", paths: [[[childPoint.longitude, childPoint.latitude],[parentPoint.longitude, parentPoint.latitude]]]},
               symbol: lineSymbol,
-              attributes: { relationship: `Gen ${generation} ancestor: ${name} ← ${person.father} (father)` },
+              attributes: { relationship: `Gen ${generation} ancestor: ${name} \u2190 ${person.father} (father)` },
               popupTemplate: { title: "Ancestor Connection", content: `{relationship}` }
             }));
             involvedPoints.push(childPoint, parentPoint);
@@ -1691,7 +1818,7 @@
             lineageLayer.add(new Graphic({
               geometry: { type: "polyline", paths: [[[childPoint.longitude, childPoint.latitude],[parentPoint.longitude, parentPoint.latitude]]]},
               symbol: lineSymbol,
-              attributes: { relationship: `Gen ${generation} ancestor: ${name} ← ${person.mother} (mother)` },
+              attributes: { relationship: `Gen ${generation} ancestor: ${name} \u2190 ${person.mother} (mother)` },
               popupTemplate: { title: "Ancestor Connection", content: `{relationship}` }
             }));
             involvedPoints.push(childPoint, parentPoint);
@@ -1702,20 +1829,24 @@
         }
 
         function traceDescendants(name, generation) {
-          if (generation > 4 || visitedDescendants.has(name) || !name) return;
+          if (generation > descendantGens || visitedDescendants.has(name) || !name) return;
           visitedDescendants.add(name);
           const parentPoint = gravesByName[name];
           if (!parentPoint) return;
           const children = childrenByParent[name] || [];
           const color = descendantColors[generation - 1] || descendantColors[3];
-          const lineSymbol = { type: "simple-line", color, width: Math.max(1, 3 - generation * 0.5), style: "solid" };
+          const lineSymbol = {
+            type: "simple-line", color,
+            width: descendantWidths[generation - 1] || 1,
+            style: descendantStyles[generation - 1] || "dash"
+          };
           children.forEach(childName => {
             const childPoint = gravesByName[childName];
             if (!childPoint) return;
             lineageLayer.add(new Graphic({
               geometry: { type: "polyline", paths: [[[parentPoint.longitude, parentPoint.latitude],[childPoint.longitude, childPoint.latitude]]]},
               symbol: lineSymbol,
-              attributes: { relationship: `Gen ${generation} descendant: ${name} → ${childName} (child)` },
+              attributes: { relationship: `Gen ${generation} descendant: ${name} \u2192 ${childName} (child)` },
               popupTemplate: { title: "Descendant Connection", content: `{relationship}` }
             }));
             involvedPoints.push(parentPoint, childPoint);
@@ -1759,7 +1890,12 @@
           lineageLayer.visible = true;
           lineageVisible = true;
           btn.textContent = count > 0 ? `⬡ ${count} links traced` : "⬡ No links found";
-          document.getElementById("webLegend").style.display = count > 0 ? "block" : "none";
+          if (count > 0) {
+            buildLegend(ancestorGens, descendantGens);
+            document.getElementById("webLegend").style.display = "block";
+          } else {
+            document.getElementById("webLegend").style.display = "none";
+          }
 
           if (count > 0) {
             // Zoom to the full extent of all lineage graphics
