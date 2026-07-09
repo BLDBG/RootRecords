@@ -1971,8 +1971,9 @@
             buildLegend(ancestorGens, descendantGens);
             document.getElementById("webLegend").style.display = "block";
             // Show only graves involved in the trace so lines have termination points
-            const nameList = involvedNames.map(n => `'${n.replace(/'/g, "''")}'`).join(",");
-            const traceFilter = `LOWER(person_id) IN (${nameList})`;
+            const traceFilter = involvedNames
+              .map(n => `person_id LIKE '%${n.replace(/'/g, "''")}%'`)
+              .join(" OR ");
             gravesLayer.definitionExpression = traceFilter;
             birthplaceLayer.definitionExpression = traceFilter;
             houseLayer.definitionExpression = traceFilter;
