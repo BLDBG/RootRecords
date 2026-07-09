@@ -1129,8 +1129,35 @@
             : (el.value.trim() || null);
         });
         try {
+          // Save site record
           const result = await editLayer.applyEdits({ updateFeatures: [{ attributes: updatedAttrs }] });
           if (result.updateFeatureResults[0].error) throw result.updateFeatureResults[0].error;
+
+          // Sync relevant fields to linked Persons record via person_globalid
+          const personGlobalId = editFeature.attributes.person_globalid;
+          if (personGlobalId) {
+            try {
+              const personResult = await personsTable.queryFeatures({
+                where: `GlobalID_2 = '${personGlobalId}'`,
+                outFields: ["OBJECTID"],
+                returnGeometry: false
+              });
+              if (personResult.features.length > 0) {
+                const personOid = personResult.features[0].attributes.OBJECTID;
+                const personUpdates = { OBJECTID: personOid };
+                if (updatedAttrs.person_id !== undefined) personUpdates.Name = updatedAttrs.person_id;
+                if (updatedAttrs.Father !== undefined) personUpdates.Father = updatedAttrs.Father;
+                if (updatedAttrs.Mother !== undefined) personUpdates.Mother = updatedAttrs.Mother;
+                if (updatedAttrs.DOB !== undefined) personUpdates.DOB = updatedAttrs.DOB;
+                if (updatedAttrs.DOD !== undefined) personUpdates.DOD = updatedAttrs.DOD;
+                await personsTable.applyEdits({ updateFeatures: [{ attributes: personUpdates }] });
+                console.log("Persons table synced for:", updatedAttrs.person_id);
+              }
+            } catch (syncErr) {
+              console.warn("Persons sync failed (site record still saved):", syncErr.message);
+            }
+          }
+
           const statusEl = document.getElementById("editStatusMsg");
           statusEl.textContent = "✓ Record updated successfully";
           statusEl.className = "status-msg success";
@@ -2193,6 +2220,7 @@
     </script>
   </body>
 </html>
+
 
 
 
