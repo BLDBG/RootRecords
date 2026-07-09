@@ -422,6 +422,22 @@
           <button class="rr-btn-secondary" id="cancelEditBtn" style="flex:1;">Cancel</button>
           <button class="rr-btn" id="saveEditBtn" style="flex:2;">Save Changes</button>
         </div>
+
+        <!-- Attachments section -->
+        <div style="margin-top:16px; border-top:1px solid #eee; padding-top:12px;">
+          <div style="font-size:11px; color:#666; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; font-weight:bold;">Attachments</div>
+          <div id="attachmentList" style="margin-bottom:8px; font-size:12px; color:#555;"></div>
+          <label style="
+            display:block; padding:7px 10px; background:#f5f5f5;
+            border:1px dashed #ccc; border-radius:3px; cursor:pointer;
+            font-size:12px; color:#666; text-align:center;
+            font-family:'Georgia',serif; transition:background 0.15s;
+          " id="attachmentLabel">
+            📎 Add Attachment
+            <input type="file" id="attachmentInput" style="display:none;" accept="image/*,.pdf,.doc,.docx" />
+          </label>
+          <div id="attachmentStatus" style="font-size:11px; color:#888; margin-top:6px; display:none;"></div>
+        </div>
       </div>
     </div>
 
@@ -922,7 +938,10 @@
         document.getElementById("editStatusMsg").className = "status-msg";
         document.getElementById("saveEditBtn").textContent = "Save Changes";
         document.getElementById("saveEditBtn").disabled = false;
+        document.getElementById("attachmentStatus").style.display = "none";
         document.getElementById("editPanel").style.display = "block";
+        // Load existing attachments
+        loadAttachments(feature, layer);
       }
 
       document.getElementById("closeEditPanel").addEventListener("click", () => {
@@ -967,7 +986,78 @@
         }
       });
 
-      // ── Move Record ──
+      // ── Attachments ──
+      // Loads existing attachments for the feature and wires up the file picker.
+      async function loadAttachments(feature, layer) {
+        const attachmentList = document.getElementById("attachmentList");
+        const oid = feature.attributes[layer.objectIdField || "OBJECTID"];
+        attachmentList.innerHTML = "<span style='color:#aaa;'>Loading...</span>";
+        try {
+          const result = await layer.queryAttachments({
+            objectIds: [oid], returnMetadata: true
+          });
+          const attachments = result[oid] || [];
+          if (attachments.length === 0) {
+            attachmentList.innerHTML = "<span style='color:#aaa; font-size:11px;'>No attachments yet.</span>";
+          } else {
+            attachmentList.innerHTML = "";
+            attachments.forEach(att => {
+              const row = document.createElement("div");
+              row.style.cssText = "display:flex; align-items:center; justify-content:space-between; padding:5px 0; border-bottom:1px solid #f0f0f0;";
+              const isImage = att.contentType && att.contentType.startsWith("image/");
+              const icon = isImage ? "🖼" : "📄";
+              const link = document.createElement("a");
+              link.href = `${layer.url}/${oid}/attachments/${att.id}`;
+              link.target = "_blank";
+              link.style.cssText = "font-size:12px; color:#1a1a2e; text-decoration:none; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;";
+              link.textContent = `${icon} ${att.name}`;
+              const delBtn = document.createElement("button");
+              delBtn.textContent = "✕";
+              delBtn.style.cssText = "background:none; border:none; color:#aaa; cursor:pointer; font-size:12px; padding:0 4px; flex-shrink:0;";
+              delBtn.title = "Delete attachment";
+              delBtn.addEventListener("click", async () => {
+                if (!confirm(`Delete "${att.name}"?`)) return;
+                try {
+                  await layer.deleteAttachments({ objectId: oid, attachmentIds: [att.id] });
+                  loadAttachments(feature, layer);
+                } catch (err) {
+                  console.error("Delete attachment failed:", err);
+                  alert("Could not delete attachment.");
+                }
+              });
+              row.appendChild(link);
+              row.appendChild(delBtn);
+              attachmentList.appendChild(row);
+            });
+          }
+        } catch (err) {
+          console.error("Load attachments failed:", err);
+          attachmentList.innerHTML = "<span style='color:#888; font-size:11px;'>Could not load attachments.</span>";
+        }
+      }
+
+      // File picker — upload on file selection
+      document.getElementById("attachmentInput").addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file || !editFeature || !editLayer) return;
+        const statusEl = document.getElementById("attachmentStatus");
+        statusEl.textContent = `Uploading ${file.name}...`;
+        statusEl.style.display = "block";
+        statusEl.style.color = "#888";
+        try {
+          const oid = editFeature.attributes[editLayer.objectIdField || "OBJECTID"];
+          await editLayer.addAttachment({ objectId: oid, attachment: file });
+          statusEl.textContent = `✓ ${file.name} uploaded`;
+          statusEl.style.color = "#2d5a2d";
+          e.target.value = ""; // reset picker
+          loadAttachments(editFeature, editLayer);
+          setTimeout(() => { statusEl.style.display = "none"; }, 2500);
+        } catch (err) {
+          console.error("Upload failed:", err);
+          statusEl.textContent = `Upload failed: ${err.message || "unknown error"}`;
+          statusEl.style.color = "#5a2d2d";
+        }
+      });
       // Activates a map-click-to-reposition mode from the popup Move action.
       function startMoveMode(feature, layer) {
         view.popup.close();
@@ -1743,6 +1833,7 @@
     </script>
   </body>
 </html>
+
 
 
 
