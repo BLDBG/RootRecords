@@ -741,26 +741,35 @@
             }));
 
             // Auto-open popup for the single matched feature
-            // Query back with full outFields so popup has all attributes
-            const layers = [gravesLayer, birthplaceLayer, houseLayer];
-            for (const l of layers) {
-              if (!l.visible) continue;
-              try {
-                const fullResult = await l.queryFeatures({
-                  where, outFields: ["*"], returnGeometry: true
+            try {
+              const layerMap = [
+                { layer: gravesLayer, visible: gravesLayer.visible },
+                { layer: birthplaceLayer, visible: birthplaceLayer.visible },
+                { layer: houseLayer, visible: houseLayer.visible }
+              ];
+              for (const { layer, visible } of layerMap) {
+                if (!visible) continue;
+                const fullResult = await layer.queryFeatures({
+                  where, outFields: ["*"], returnGeometry: true,
+                  num: 1
                 });
                 if (fullResult.features.length > 0) {
                   const f = fullResult.features[0];
+                  f.sourceLayer = layer;
                   view.popup.open({
+                    title: f.attributes.person_id,
                     features: [f],
-                    location: f.geometry
+                    location: f.geometry,
+                    fetchFeatures: true
                   });
-                  // Move search panel to left so it doesn't overlap popup
+                  // Move search panel left so it doesn't overlap popup
                   searchPanel.style.right = "auto";
                   searchPanel.style.left = "10px";
                   break;
                 }
-              } catch (e) { /* layer may have no results */ }
+              }
+            } catch (popupErr) {
+              console.warn("Auto popup failed:", popupErr);
             }
           } else if (allFeatures.length > 1) {
             await view.goTo(allFeatures, { duration: 1000, easing: "ease-in-out" });
@@ -1890,6 +1899,7 @@
     </script>
   </body>
 </html>
+
 
 
 
