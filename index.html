@@ -815,11 +815,18 @@
       // Search helper — tries LIKE first, falls back to SOUNDEX for phonetic matching
       async function queryPersons(where) {
         const url = `${PERSONS_URL}/query?where=${encodeURIComponent(where)}&outFields=Name,GlobalID_2&f=json&returnGeometry=false`;
-        console.log("Fetching:", url);
-        const resp = await fetch(url);
-        const data = await resp.json();
-        console.log("Response:", (data.features || []).length, "features");
-        return data.features || [];
+        console.log("Fetching URL:", url);
+        try {
+          const resp = await fetch(url);
+          console.log("Fetch status:", resp.status, resp.ok);
+          const text = await resp.text();
+          console.log("Raw response:", text.slice(0, 300));
+          const data = JSON.parse(text);
+          return data.features || [];
+        } catch (fetchErr) {
+          console.error("Fetch error:", fetchErr.name, fetchErr.message);
+          throw fetchErr;
+        }
       }
 
       async function searchPersonByName(input) {
@@ -2096,6 +2103,7 @@
     </script>
   </body>
 </html>
+
 
 
 
