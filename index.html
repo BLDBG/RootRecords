@@ -194,71 +194,7 @@
       }
       #addSiteTrigger:hover { background: #f5f5f5; }
 
-      /* ── Sepia portrait popup styling ── */
-    .esri-popup__main-container {
-      background: #f5efe0 !important;
-      border: 1px solid #c8b89a !important;
-      border-radius: 4px !important;
-      box-shadow: 0 2px 12px rgba(100,70,30,0.25) !important;
-      font-family: 'Georgia', serif !important;
-      max-width: 320px !important;
-    }
-    .esri-popup__header {
-      background: #2c1a0e !important;
-      border-bottom: 2px solid #c8b89a !important;
-      padding: 10px 14px !important;
-    }
-    .esri-popup__header-title {
-      color: #e8d5b0 !important;
-      font-family: 'Georgia', serif !important;
-      font-size: 13px !important;
-      letter-spacing: 1px !important;
-      text-transform: uppercase !important;
-    }
-    .esri-popup__content {
-      background: #f5efe0 !important;
-      padding: 12px 14px !important;
-    }
-    .esri-feature__field-header {
-      color: #6b4c2a !important;
-      font-family: 'Georgia', serif !important;
-      font-size: 10px !important;
-      letter-spacing: 1px !important;
-      text-transform: uppercase !important;
-      border-bottom: 1px solid #d4c4a8 !important;
-      padding-bottom: 2px !important;
-      margin-bottom: 2px !important;
-    }
-    .esri-feature__field-data {
-      color: #2c1a0e !important;
-      font-family: 'Georgia', serif !important;
-      font-size: 12px !important;
-    }
-    .esri-popup__footer {
-      background: #ede3cc !important;
-      border-top: 1px solid #c8b89a !important;
-    }
-    .esri-popup__button {
-      color: #6b4c2a !important;
-    }
-    .esri-popup__button:hover {
-      background: #d4c4a8 !important;
-    }
-    .esri-popup__action-toggle {
-      color: #6b4c2a !important;
-    }
-    .esri-popup__navigation-btn {
-      color: #6b4c2a !important;
-    }
-    /* Action buttons (Edit, Move, Delete) */
-    .esri-popup__actions-menu-item {
-      background: #f5efe0 !important;
-      color: #2c1a0e !important;
-      font-family: 'Georgia', serif !important;
-    }
-    .esri-popup__actions-menu-item:hover {
-      background: #d4c4a8 !important;
-    }
+
       @media (min-width: 1920px) {
         .esri-ui .esri-component { transform: scale(0.8); transform-origin: top left; }
         .esri-ui-top-right .esri-component { transform-origin: top right; }
@@ -2069,6 +2005,37 @@
         }
       });
 
+      // Inject sepia styles into popup Shadow DOM after it renders.
+      // Direct CSS can't reach Esri's Shadow DOM so we inject after popup opens.
+      function injectPopupStyles() {
+        setTimeout(() => {
+          document.querySelectorAll("*").forEach(el => {
+            if (!el.shadowRoot) return;
+            if (el.shadowRoot.querySelector("#rr-popup-styles")) return;
+            const html = el.shadowRoot.innerHTML;
+            if (!html.includes("esri-popup") && !html.includes("esri-feature")) return;
+            const style = document.createElement("style");
+            style.id = "rr-popup-styles";
+            style.textContent = `
+              .esri-popup__main-container, .esri-popup__main-container * { font-family: 'Georgia', serif !important; }
+              .esri-popup__main-container { background: #f5efe0 !important; border: 1px solid #c8b89a !important; }
+              .esri-popup__header { background: #2c1a0e !important; border-bottom: 2px solid #c8b89a !important; }
+              .esri-popup__header-title { color: #e8d5b0 !important; letter-spacing: 1px !important; font-size: 13px !important; }
+              .esri-popup__content { background: #f5efe0 !important; }
+              .esri-popup__footer { background: #ede3cc !important; border-top: 1px solid #c8b89a !important; }
+              .esri-popup__button { color: #6b4c2a !important; }
+              .esri-popup__button:hover { background: #d4c4a8 !important; }
+              .esri-feature__field-header { color: #6b4c2a !important; font-size: 10px !important; letter-spacing: 1px !important; text-transform: uppercase !important; border-bottom: 1px solid #d4c4a8 !important; }
+              .esri-feature__field-data { color: #2c1a0e !important; font-size: 12px !important; }
+              :host { background: #f5efe0 !important; }
+            `;
+            el.shadowRoot.appendChild(style);
+          });
+        }, 300);
+      }
+
+      view.popup.watch("visible", visible => { if (visible) injectPopupStyles(); });
+
       // Error logging
       gravesLayer.when(() => console.log("Graves loaded")).catch(e => console.error("Graves failed:", e));
       birthplaceLayer.when(() => console.log("Birthplaces loaded")).catch(e => console.error("Birthplaces failed:", e));
@@ -2086,6 +2053,7 @@
     </script>
   </body>
 </html>
+
 
 
 
