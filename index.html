@@ -480,16 +480,24 @@
       // Popup templates — one per site type, showing only relevant fields.
       const gravePopup = {
         title: "⚰ {person_id}", actions: popupActions,
-        content: [{ type: "fields", fieldInfos: [
-          { fieldName: "DOB", label: "Date of Birth" },
-          { fieldName: "DOD", label: "Date of Death" },
-          { fieldName: "Father", label: "Father" },
-          { fieldName: "Mother", label: "Mother" },
-          { fieldName: "CemeteryName", label: "Cemetery" },
-          { fieldName: "County", label: "County" },
-          { fieldName: "State", label: "State" },
-          { fieldName: "Description", label: "Notes" }
-        ]}]
+        content: [
+          {
+            type: "attachments",
+            displayType: "preview"
+          },
+          {
+            type: "fields", fieldInfos: [
+              { fieldName: "DOB", label: "Date of Birth" },
+              { fieldName: "DOD", label: "Date of Death" },
+              { fieldName: "Father", label: "Father" },
+              { fieldName: "Mother", label: "Mother" },
+              { fieldName: "CemeteryName", label: "Cemetery" },
+              { fieldName: "County", label: "County" },
+              { fieldName: "State", label: "State" },
+              { fieldName: "Description", label: "Notes" }
+            ]
+          }
+        ]
       };
       const birthplacePopup = {
         title: "🏠 {person_id}", actions: popupActions,
@@ -1853,6 +1861,7 @@
     </script>
   </body>
 </html>
+
 
 
 
