@@ -463,6 +463,55 @@
       box-shadow:0 2px 8px rgba(0,0,0,0.3);
     ">Click the map to set the new location — press Esc to cancel</div>
 
+    <!-- ── Custom Sepia Feature Panel ── -->
+    <div id="featurePanel" style="
+      position:fixed; bottom:20px; left:20px; z-index:300;
+      width:300px; background:#f5efe0;
+      border:1px solid #c8b89a; border-radius:4px;
+      box-shadow:0 4px 16px rgba(100,70,30,0.3);
+      font-family:'Georgia',serif; display:none;
+      max-height:70vh; overflow-y:auto;
+    ">
+      <!-- Header -->
+      <div style="
+        background:#2c1a0e; color:#e8d5b0;
+        padding:10px 14px; border-radius:4px 4px 0 0;
+        display:flex; justify-content:space-between; align-items:center;
+      ">
+        <span id="featurePanelTitle" style="font-size:13px; letter-spacing:1px; text-transform:uppercase; flex:1;"></span>
+        <button onclick="document.getElementById('featurePanel').style.display='none'" style="
+          background:none; border:none; color:#e8d5b0;
+          font-size:16px; cursor:pointer; padding:0; line-height:1; margin-left:8px;
+        ">✕</button>
+      </div>
+      <!-- Attachment images -->
+      <div id="featurePanelAttachments" style="padding:8px 12px 0;"></div>
+      <!-- Fields -->
+      <div id="featurePanelFields" style="padding:10px 14px;"></div>
+      <!-- Action buttons -->
+      <div style="
+        padding:8px 14px; border-top:1px solid #d4c4a8;
+        background:#ede3cc; border-radius:0 0 4px 4px;
+        display:flex; gap:6px;
+      ">
+        <button id="featurePanelEdit" style="
+          flex:1; padding:6px; background:#2c1a0e; color:#e8d5b0;
+          border:none; border-radius:3px; cursor:pointer;
+          font-family:'Georgia',serif; font-size:11px; letter-spacing:0.5px;
+        ">✎ Edit</button>
+        <button id="featurePanelMove" style="
+          flex:1; padding:6px; background:#5a3a1a; color:#e8d5b0;
+          border:none; border-radius:3px; cursor:pointer;
+          font-family:'Georgia',serif; font-size:11px; letter-spacing:0.5px;
+        ">⊕ Move</button>
+        <button id="featurePanelDelete" style="
+          flex:1; padding:6px; background:#8b1a1a; color:#fff;
+          border:none; border-radius:3px; cursor:pointer;
+          font-family:'Georgia',serif; font-size:11px; letter-spacing:0.5px;
+        ">✕ Delete</button>
+      </div>
+    </div>
+
     <script type="module">
       // I am using the ArcGIS Maps SDK for JavaScript (v5.1) ES module syntax.
       import Map from "https://js.arcgis.com/5.1/@arcgis/core/Map.js";
@@ -762,32 +811,78 @@
               }
             }));
 
-            // Auto-open popup for the single matched feature
+            // Auto-open custom feature panel for the single matched feature
             try {
               const layerMap = [
-                { layer: gravesLayer, visible: gravesLayer.visible },
-                { layer: birthplaceLayer, visible: birthplaceLayer.visible },
-                { layer: houseLayer, visible: houseLayer.visible }
+                { layer: gravesLayer },
+                { layer: birthplaceLayer },
+                { layer: houseLayer }
               ];
-              for (const { layer, visible } of layerMap) {
-                if (!visible) continue;
+              for (const { layer } of layerMap) {
+                if (!layer.visible) continue;
                 const fullResult = await layer.queryFeatures({
-                  where, outFields: ["*"], returnGeometry: true,
-                  num: 1
+                  where, outFields: ["*"], returnGeometry: true, num: 1
                 });
                 if (fullResult.features.length > 0) {
                   const f = fullResult.features[0];
-                  f.sourceLayer = layer;
-                  view.openPopup({
-                    title: f.attributes.person_id,
-                    features: [f],
-                    location: f.geometry
-                  });
+                  f.layer = layer;
+                  // Simulate a click hit to open our custom panel
+                  const attrs = f.attributes;
+                  const isGrave = layer === gravesLayer;
+                  const isBirth = layer === birthplaceLayer;
+                  const icon = isGrave ? "⚰" : isBirth ? "🏠" : "🏡";
+                  document.getElementById("featurePanelTitle").textContent = `${icon} ${attrs.person_id || "Unknown"}`;
+                  const fieldDefs = isGrave ? [
+                    ["Date of Birth", attrs.DOB ? new Date(attrs.DOB).toLocaleDateString() : null],
+                    ["Date of Death", attrs.DOD ? new Date(attrs.DOD).toLocaleDateString() : null],
+                    ["Father", attrs.Father], ["Mother", attrs.Mother],
+                    ["Cemetery", attrs.CemeteryName], ["County", attrs.County],
+                    ["State", attrs.State], ["Notes", attrs.Description]
+                  ] : isBirth ? [
+                    ["Date of Birth", attrs.DOB ? new Date(attrs.DOB).toLocaleDateString() : null],
+                    ["Father", attrs.Father], ["Mother", attrs.Mother],
+                    ["City", attrs.City], ["County", attrs.County],
+                    ["State", attrs.State], ["Notes", attrs.Description]
+                  ] : [
+                    ["Father", attrs.Father], ["Mother", attrs.Mother],
+                    ["Address", attrs.Address], ["City", attrs.City],
+                    ["County", attrs.County], ["State", attrs.State],
+                    ["Notes", attrs.Description]
+                  ];
+                  document.getElementById("featurePanelFields").innerHTML = fieldDefs
+                    .filter(([, v]) => v)
+                    .map(([l, v]) => `<div style="margin-bottom:8px;"><div style="font-size:10px;color:#6b4c2a;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #d4c4a8;padding-bottom:2px;margin-bottom:2px;font-family:'Georgia',serif;">${l}</div><div style="font-size:12px;color:#2c1a0e;font-family:'Georgia',serif;">${v}</div></div>`)
+                    .join("") || "<div style='color:#888;font-size:12px;'>No details recorded.</div>";
+                  document.getElementById("featurePanelEdit").onclick = () => { document.getElementById("featurePanel").style.display = "none"; openEditPanel(f, layer); };
+                  document.getElementById("featurePanelMove").onclick = () => { document.getElementById("featurePanel").style.display = "none"; startMoveMode(f, layer); };
+                  document.getElementById("featurePanelDelete").onclick = async () => {
+                    if (!confirm(`Delete record for "${attrs.person_id}"?`)) return;
+                    const oid = attrs[layer.objectIdField || "OBJECTID"];
+                    await layer.applyEdits({ deleteFeatures: [{ objectId: oid }] });
+                    document.getElementById("featurePanel").style.display = "none";
+                  };
+                  // Load attachment images
+                  const oid = attrs[layer.objectIdField || "OBJECTID"];
+                  const attDiv = document.getElementById("featurePanelAttachments");
+                  attDiv.innerHTML = "";
+                  try {
+                    const resp = await fetch(`${getLayerRestUrl(layer)}/${oid}/attachments?f=json`);
+                    const data = await resp.json();
+                    (data.attachmentInfos || []).forEach(att => {
+                      if (att.contentType && att.contentType.startsWith("image/")) {
+                        const img = document.createElement("img");
+                        img.src = `${getLayerRestUrl(layer)}/${oid}/attachments/${att.id}`;
+                        img.style.cssText = "width:100%;border-radius:3px;margin-bottom:8px;border:1px solid #c8b89a;";
+                        attDiv.appendChild(img);
+                      }
+                    });
+                  } catch (e) { /* no attachments */ }
+                  document.getElementById("featurePanel").style.display = "block";
                   break;
                 }
               }
             } catch (popupErr) {
-              console.warn("Auto popup failed:", popupErr);
+              console.warn("Auto panel failed:", popupErr);
             }
           } else if (allFeatures.length > 1) {
             await view.goTo(allFeatures, { duration: 1000, easing: "ease-in-out" });
@@ -1172,34 +1267,7 @@
         document.addEventListener("keydown", escHandler);
       }
 
-      // Popup action handler — edit, move, and delete
-      on(() => view.popup, "trigger-action", async (event) => {
-        const feature = view.popup.selectedFeature;
-        if (!feature) return;
-        const layers = [gravesLayer, birthplaceLayer, houseLayer];
-        let targetLayer = feature.sourceLayer || feature.layer || gravesLayer;
-        for (const l of layers) {
-          if (feature.sourceLayer?.url?.includes(l.url?.split("/FeatureServer")[0]?.split("/").pop())) {
-            targetLayer = l; break;
-          }
-        }
-        if (event.action.id === "edit-record") {
-          view.popup.close();
-          openEditPanel(feature, targetLayer);
-        }
-        if (event.action.id === "move-record") {
-          startMoveMode(feature, targetLayer);
-        }
-        if (event.action.id === "delete-record") {
-          const name = feature.attributes.person_id || "this feature";
-          if (!confirm(`Delete record for "${name}"? This cannot be undone.`)) return;
-          try {
-            const oid = feature.attributes[targetLayer.objectIdField || "OBJECTID"];
-            await targetLayer.applyEdits({ deleteFeatures: [{ objectId: oid }] });
-            view.popup.close();
-          } catch (err) { console.error("Delete failed:", err); alert("Delete failed."); }
-        }
-      });
+      // Popup actions now handled by the custom feature panel click handler below.
 
       // ════════════════════════════════════════════
       // CUSTOM ADD SITE WORKFLOW
@@ -2005,36 +2073,113 @@
         }
       });
 
-      // Inject sepia styles into popup Shadow DOM after it renders.
-      // Direct CSS can't reach Esri's Shadow DOM so we inject after popup opens.
-      function injectPopupStyles() {
-        setTimeout(() => {
-          document.querySelectorAll("*").forEach(el => {
-            if (!el.shadowRoot) return;
-            if (el.shadowRoot.querySelector("#rr-popup-styles")) return;
-            const html = el.shadowRoot.innerHTML;
-            if (!html.includes("esri-popup") && !html.includes("esri-feature")) return;
-            const style = document.createElement("style");
-            style.id = "rr-popup-styles";
-            style.textContent = `
-              .esri-popup__main-container, .esri-popup__main-container * { font-family: 'Georgia', serif !important; }
-              .esri-popup__main-container { background: #f5efe0 !important; border: 1px solid #c8b89a !important; }
-              .esri-popup__header { background: #2c1a0e !important; border-bottom: 2px solid #c8b89a !important; }
-              .esri-popup__header-title { color: #e8d5b0 !important; letter-spacing: 1px !important; font-size: 13px !important; }
-              .esri-popup__content { background: #f5efe0 !important; }
-              .esri-popup__footer { background: #ede3cc !important; border-top: 1px solid #c8b89a !important; }
-              .esri-popup__button { color: #6b4c2a !important; }
-              .esri-popup__button:hover { background: #d4c4a8 !important; }
-              .esri-feature__field-header { color: #6b4c2a !important; font-size: 10px !important; letter-spacing: 1px !important; text-transform: uppercase !important; border-bottom: 1px solid #d4c4a8 !important; }
-              .esri-feature__field-data { color: #2c1a0e !important; font-size: 12px !important; }
-              :host { background: #f5efe0 !important; }
-            `;
-            el.shadowRoot.appendChild(style);
-          });
-        }, 300);
-      }
+      // ── Custom feature info panel ──
+      // Instead of trying to style Esri's Shadow DOM popup, we disable the
+      // default popup and show our own fully-styled sepia panel on click.
+      view.popup.autoOpenEnabled = false;
 
-      view.popup.watch("visible", visible => { if (visible) injectPopupStyles(); });
+      view.on("click", async (e) => {
+        const hit = await view.hitTest(e);
+        const result = hit.results.find(r =>
+          r.graphic && r.graphic.layer &&
+          [gravesLayer, birthplaceLayer, houseLayer].includes(r.graphic.layer)
+        );
+        if (!result) {
+          document.getElementById("featurePanel").style.display = "none";
+          return;
+        }
+        const graphic = result.graphic;
+        const layer = graphic.layer;
+        const attrs = graphic.attributes;
+
+        // Determine icon and fields by layer
+        const isGrave = layer === gravesLayer;
+        const isBirth = layer === birthplaceLayer;
+        const icon = isGrave ? "⚰" : isBirth ? "🏠" : "🏡";
+        const title = `${icon} ${attrs.person_id || "Unknown"}`;
+
+        const fieldDefs = isGrave ? [
+          ["Date of Birth", attrs.DOB ? new Date(attrs.DOB).toLocaleDateString() : null],
+          ["Date of Death", attrs.DOD ? new Date(attrs.DOD).toLocaleDateString() : null],
+          ["Father", attrs.Father],
+          ["Mother", attrs.Mother],
+          ["Cemetery", attrs.CemeteryName],
+          ["County", attrs.County],
+          ["State", attrs.State],
+          ["Notes", attrs.Description]
+        ] : isBirth ? [
+          ["Date of Birth", attrs.DOB ? new Date(attrs.DOB).toLocaleDateString() : null],
+          ["Father", attrs.Father],
+          ["Mother", attrs.Mother],
+          ["City", attrs.City],
+          ["County", attrs.County],
+          ["State", attrs.State],
+          ["Notes", attrs.Description]
+        ] : [
+          ["Father", attrs.Father],
+          ["Mother", attrs.Mother],
+          ["Address", attrs.Address],
+          ["City", attrs.City],
+          ["County", attrs.County],
+          ["State", attrs.State],
+          ["Notes", attrs.Description]
+        ];
+
+        document.getElementById("featurePanelTitle").textContent = title;
+
+        const fieldsHtml = fieldDefs
+          .filter(([, val]) => val)
+          .map(([label, val]) => `
+            <div style="margin-bottom:8px;">
+              <div style="font-size:10px; color:#6b4c2a; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #d4c4a8; padding-bottom:2px; margin-bottom:2px; font-family:'Georgia',serif;">${label}</div>
+              <div style="font-size:12px; color:#2c1a0e; font-family:'Georgia',serif;">${val}</div>
+            </div>
+          `).join("");
+
+        document.getElementById("featurePanelFields").innerHTML = fieldsHtml || "<div style='color:#888; font-size:12px;'>No details recorded.</div>";
+
+        // Action buttons
+        document.getElementById("featurePanelEdit").onclick = () => {
+          document.getElementById("featurePanel").style.display = "none";
+          openEditPanel(graphic, layer);
+        };
+        document.getElementById("featurePanelMove").onclick = () => {
+          document.getElementById("featurePanel").style.display = "none";
+          startMoveMode(graphic, layer);
+        };
+        document.getElementById("featurePanelDelete").onclick = async () => {
+          const name = attrs.person_id || "this feature";
+          if (!confirm(`Delete record for "${name}"? This cannot be undone.`)) return;
+          try {
+            const oid = attrs[layer.objectIdField || "OBJECTID"];
+            await layer.applyEdits({ deleteFeatures: [{ objectId: oid }] });
+            document.getElementById("featurePanel").style.display = "none";
+          } catch (err) { alert("Delete failed."); }
+        };
+
+        // Load attachments preview
+        const oid = attrs[layer.objectIdField || "OBJECTID"];
+        const layerRestUrl = getLayerRestUrl(layer);
+        const attDiv = document.getElementById("featurePanelAttachments");
+        attDiv.innerHTML = "";
+        try {
+          const resp = await fetch(`${layerRestUrl}/${oid}/attachments?f=json`);
+          const data = await resp.json();
+          const atts = data.attachmentInfos || [];
+          if (atts.length > 0) {
+            atts.forEach(att => {
+              if (att.contentType && att.contentType.startsWith("image/")) {
+                const img = document.createElement("img");
+                img.src = `${layerRestUrl}/${oid}/attachments/${att.id}`;
+                img.style.cssText = "width:100%; border-radius:3px; margin-bottom:8px; border:1px solid #c8b89a;";
+                attDiv.appendChild(img);
+              }
+            });
+          }
+        } catch (e) { /* no attachments */ }
+
+        document.getElementById("featurePanel").style.display = "block";
+      });
 
       // Error logging
       gravesLayer.when(() => console.log("Graves loaded")).catch(e => console.error("Graves failed:", e));
