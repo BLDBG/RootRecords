@@ -807,35 +807,43 @@
       document.getElementById("searchBtn").addEventListener("click", async () => {
         const name = document.getElementById("personSearch").value.trim();
         if (!name) return;
-        // Look up GlobalID_2 for this person name
         try {
           const result = await personsTable.queryFeatures({
             where: `Name LIKE '%${name}%'`,
             outFields: ["Name", "GlobalID_2"],
             returnGeometry: false
           });
-          const globalId = result.features.length > 0 ? result.features[0].attributes.GlobalID_2 : null;
-          applyFilter(name, globalId);
+          if (result.features.length > 0) {
+            const fullName = result.features[0].attributes.Name;
+            const globalId = result.features[0].attributes.GlobalID_2 || null;
+            applyFilter(fullName, globalId);
+          } else {
+            applyFilter(name, null);
+          }
         } catch (err) {
           applyFilter(name, null);
         }
       });
 
       document.getElementById("personSearch").addEventListener("keydown", async e => {
-        if (e.key === "Enter") {
-          const name = document.getElementById("personSearch").value.trim();
-          if (!name) return;
-          try {
-            const result = await personsTable.queryFeatures({
-              where: `Name LIKE '%${name}%'`,
-              outFields: ["Name", "GlobalID_2"],
-              returnGeometry: false
-            });
-            const globalId = result.features.length > 0 ? result.features[0].attributes.GlobalID_2 : null;
-            applyFilter(name, globalId);
-          } catch (err) {
+        if (e.key !== "Enter") return;
+        const name = document.getElementById("personSearch").value.trim();
+        if (!name) return;
+        try {
+          const result = await personsTable.queryFeatures({
+            where: `Name LIKE '%${name}%'`,
+            outFields: ["Name", "GlobalID_2"],
+            returnGeometry: false
+          });
+          if (result.features.length > 0) {
+            const fullName = result.features[0].attributes.Name;
+            const globalId = result.features[0].attributes.GlobalID_2 || null;
+            applyFilter(fullName, globalId);
+          } else {
             applyFilter(name, null);
           }
+        } catch (err) {
+          applyFilter(name, null);
         }
       });
 
@@ -2018,6 +2026,7 @@
     </script>
   </body>
 </html>
+
 
 
 
