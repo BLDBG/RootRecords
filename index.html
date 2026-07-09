@@ -807,22 +807,30 @@
       // Search helper — tries LIKE first, falls back to SOUNDEX for phonetic matching
       async function searchPersonByName(input) {
         // First try exact/partial LIKE match
+        console.log("Searching LIKE:", input);
         let result = await personsTable.queryFeatures({
           where: `Name LIKE '%${input}%'`,
           outFields: ["Name", "GlobalID_2"],
           returnGeometry: false
         });
+        console.log("LIKE results:", result.features.length, result.features.map(f => f.attributes.Name));
         if (result.features.length > 0) {
           return { feature: result.features[0], matched: "like" };
         }
         // Fall back to SOUNDEX phonetic match
-        result = await personsTable.queryFeatures({
-          where: `SOUNDEX(Name) = SOUNDEX('${input}')`,
-          outFields: ["Name", "GlobalID_2"],
-          returnGeometry: false
-        });
-        if (result.features.length > 0) {
-          return { feature: result.features[0], matched: "soundex" };
+        console.log("Trying SOUNDEX for:", input);
+        try {
+          result = await personsTable.queryFeatures({
+            where: `SOUNDEX(Name) = SOUNDEX('${input}')`,
+            outFields: ["Name", "GlobalID_2"],
+            returnGeometry: false
+          });
+          console.log("SOUNDEX results:", result.features.length, result.features.map(f => f.attributes.Name));
+          if (result.features.length > 0) {
+            return { feature: result.features[0], matched: "soundex" };
+          }
+        } catch (soundexErr) {
+          console.warn("SOUNDEX not supported:", soundexErr.message);
         }
         return null;
       }
