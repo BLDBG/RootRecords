@@ -961,31 +961,43 @@
             outFields: ["CemeteryName", "Address", "City", "County", "State"], returnGeometry: true
           }).then(result => {
             if (result.features.length > 0) {
-              placedPoint = result.features[0].geometry;
               const attrs = result.features[0].attributes;
 
-              document.getElementById("coordDisplay").textContent = `📍 ${placedPoint.latitude.toFixed(5)}, ${placedPoint.longitude.toFixed(5)}`;
-              clickBanner.classList.remove("visible");
-              if (mapClickHandler) { mapClickHandler.remove(); mapClickHandler = null; }
+              // Zoom to the cemetery but stay on Step 2 so the user
+              // can manually place the exact grave location.
+              view.goTo({ target: result.features[0].geometry, zoom: 16 },
+                { duration: 1000, easing: "ease-in-out" });
 
-              // Zoom to the cemetery location
-              view.goTo({ target: placedPoint, zoom: 16 }, { duration: 1000, easing: "ease-in-out" });
+              // Update the banner to prompt for manual placement
+              document.getElementById("coordDisplay").textContent = "📍 Now click the map to place the exact grave location";
+              document.getElementById("coordDisplay").style.color = "#1a1a2e";
 
-              // Pre-fill cemetery fields and advance to step 3
-              buildSiteFields();
-              showStep(3);
-
-              // Pre-fill all available cemetery location fields
-              const fieldMap = {
+              // Store cemetery details to auto-fill when Step 3 is reached
+              const pendingCemeteryFields = {
                 sCemeteryName: attrs.CemeteryName,
                 sAddress:      attrs.Address,
                 sCity:         attrs.City,
                 sCounty:       attrs.County,
                 sState:        attrs.State
               };
-              Object.entries(fieldMap).forEach(([id, val]) => {
-                const el = document.getElementById(id);
-                if (el && val) el.value = val;
+
+              // Remove existing click handler and set a new one that
+              // auto-fills the cemetery details after point is placed
+              if (mapClickHandler) { mapClickHandler.remove(); mapClickHandler = null; }
+              mapClickHandler = view.on("click", (e) => {
+                e.stopPropagation();
+                placedPoint = e.mapPoint;
+                document.getElementById("coordDisplay").textContent = `📍 ${placedPoint.latitude.toFixed(5)}, ${placedPoint.longitude.toFixed(5)}`;
+                document.getElementById("coordDisplay").style.color = "#888";
+                clickBanner.classList.remove("visible");
+                mapClickHandler.remove(); mapClickHandler = null;
+                buildSiteFields();
+                showStep(3);
+                // Auto-fill cemetery fields
+                Object.entries(pendingCemeteryFields).forEach(([id, val]) => {
+                  const el = document.getElementById(id);
+                  if (el && val) el.value = val;
+                });
               });
             }
           }).catch(err => console.warn("Cemetery location lookup failed:", err));
@@ -1522,6 +1534,7 @@
     </script>
   </body>
 </html>
+
 
 
 
