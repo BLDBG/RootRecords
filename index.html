@@ -813,34 +813,33 @@
       }
 
       // Search helper — tries LIKE first, falls back to SOUNDEX for phonetic matching
+      async function queryPersons(where) {
+        const url = `${PERSONS_URL}/query?where=${encodeURIComponent(where)}&outFields=Name,GlobalID_2&f=json&returnGeometry=false`;
+        console.log("Fetching:", url);
+        const resp = await fetch(url);
+        const data = await resp.json();
+        console.log("Response:", (data.features || []).length, "features");
+        return data.features || [];
+      }
+
       async function searchPersonByName(input) {
         console.log("searchPersonByName called with:", input);
+        const safe = input.replace(/'/g, "''");
+
+        // LIKE match
         try {
-          const safe = input.replace(/'/g, "''");
-
-          // Query Persons table directly via REST
-          async function queryPersons(where) {
-            const url = `${PERSONS_URL}/query?where=${encodeURIComponent(where)}&outFields=Name,GlobalID_2&f=json&returnGeometry=false`;
-            console.log("Fetching:", url);
-            const resp = await fetch(url);
-            const data = await resp.json();
-            console.log("Response features:", (data.features || []).length);
-            return data.features || [];
-          }
-
-          // LIKE match
           const likeFeatures = await queryPersons(`Name LIKE '%${safe}%'`);
           if (likeFeatures.length > 0) {
             console.log("LIKE match:", likeFeatures[0].attributes.Name);
             return { attributes: likeFeatures[0].attributes, matched: "like" };
           }
+        } catch (e) { console.warn("LIKE error:", e.message); }
 
-          // Client-side soundex
-          console.log("No LIKE match — trying soundex");
+        // Client-side soundex
+        try {
           const allFeatures = await queryPersons("1=1");
           const inputCode = soundex(safe);
           console.log("Soundex code:", inputCode);
-          console.log("Names:", allFeatures.map(f => f.attributes.Name + " → " + soundex(f.attributes.Name || "")));
           const match = allFeatures.find(f => {
             const name = f.attributes.Name || "";
             return soundex(name) === inputCode || soundex(name.split(" ")[0]) === inputCode;
@@ -849,12 +848,10 @@
             console.log("Soundex match:", match.attributes.Name);
             return { attributes: match.attributes, matched: "soundex" };
           }
-          console.log("No match found");
-          return null;
-        } catch (err) {
-          console.error("searchPersonByName error:", err.message, err.stack);
-          return null;
-        }
+        } catch (e) { console.warn("Soundex error:", e.message); }
+
+        console.log("No match found");
+        return null;
       }
           if (match) {
             console.log("Soundex match:", match.attributes.Name);
@@ -2099,6 +2096,7 @@
     </script>
   </body>
 </html>
+
 
 
 
