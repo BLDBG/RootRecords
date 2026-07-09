@@ -1970,13 +1970,11 @@
           if (count > 0) {
             buildLegend(ancestorGens, descendantGens);
             document.getElementById("webLegend").style.display = "block";
-            // Show only graves involved in the trace so lines have termination points
-            const traceFilter = involvedNames
-              .map(n => `person_id LIKE '%${n.replace(/'/g, "''")}%'`)
-              .join(" OR ");
-            gravesLayer.definitionExpression = traceFilter;
-            birthplaceLayer.definitionExpression = traceFilter;
-            houseLayer.definitionExpression = traceFilter;
+            // Clear definition expression so all graves are visible
+            // giving the lineage lines natural termination points
+            gravesLayer.definitionExpression = "";
+            birthplaceLayer.definitionExpression = "";
+            houseLayer.definitionExpression = "";
           } else {
             document.getElementById("webLegend").style.display = "none";
           }
